@@ -1,0 +1,12 @@
+# 浏览器验证截图等本地产物,不参与部署
+output/
+node_modules/
+.playwright-cli/
+*.log
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
