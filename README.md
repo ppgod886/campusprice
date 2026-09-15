@@ -137,6 +137,31 @@ git push origin main
 
 部署后如果没看到更新,是 Pages 的 CDN 缓存,等 1-2 分钟并强制刷新(Ctrl+F5)。
 
+### ⚠️ 这台机器上的推送配置(踩过的坑)
+
+本机全局 git 配置里有一条 URL 改写规则,把所有 `github.com` 请求转到 `ghproxy.net` 镜像:
+
+```
+url.https://ghproxy.net/https://github.com/.insteadof = https://github.com/
+```
+
+`ghproxy` 是**只读**镜像 —— `clone` / `fetch` 能用,`push` 会一直卡住直到超时。所以本仓库做了拆分配置:
+
+```bash
+# 拉取继续走代理(快)
+git remote set-url          origin 'https://ghproxy.net/https://github.com/ppgod886/campusprice.git'
+# 推送直连(镜像不支持写)。注意 URL 里带了用户名,
+# 这样它不以 https://github.com/ 开头,不会被上面的规则改写
+git remote set-url --push   origin 'https://ppgod886@github.com/ppgod886/campusprice.git'
+# 凭据交给已登录的 gh,避免走 Git Credential Manager 反复弹窗
+git config --local credential.helper '!gh auth git-credential'
+```
+
+这几条都是**仓库级**配置,没有动全局设置。换机器或重新 clone 之后需要重设一次。
+
+另外:如果 `git add` 报 `unable to write new index file` 或 `couldn't set refs/remotes/...`,
+通常是有残留的 git 进程占着 `.git/index`,等几秒重试即可,不会丢东西。
+
 ---
 
 ## 改动历史
