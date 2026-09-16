@@ -178,15 +178,19 @@ document.getElementById('submitBtn').addEventListener('click', async (e)=>{
   s += '—— 来自朋友圈用户调研';
 
   // 自动提交到收集端点(Netlify Forms);失败则回退为复制模式
+  // 注意: Netlify 的 urlencoded 解析对百分号编码的中文会丢值,必须发原始 UTF-8,
+  // 仅对保留字符做转义
+  const esc = s => s.replace(/%/g,'%25').replace(/&/g,'%26').replace(/\+/g,'%2B')
+                    .replace(/=/g,'%3D').replace(/#/g,'%23').replace(/ /g,'%20').replace(/\n/g,'%0A');
   const FIELD = {1:'身份',2:'网购频率',3:'比价习惯',4:'首页印象',5:'界面评价',6:'找到比价功能',7:'最有吸引力',8:'波动建议评价',9:'期望新增',10:'使用场景',11:'推荐意愿',12:'开放建议'};
-  const body = new URLSearchParams();
-  body.append('form-name', 'campusprice-survey');
+  const pairs = [['form-name','campusprice-survey']];
   const now = new Date();
-  body.append('提交时间', `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`);
+  pairs.push(['提交时间', `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`]);
   QS.forEach(q=>{
     const v = q.type==='open' ? ((ans[q.id]||'').trim() || '(未填写)') : (ans[q.id]||[]).join(' | ');
-    body.append(FIELD[q.id], v);
+    pairs.push([FIELD[q.id], v]);
   });
+  const body = pairs.map(([k,v]) => esc(k) + '=' + esc(v)).join('&');
 
   let autoOk = false;
   try {
