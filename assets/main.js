@@ -429,7 +429,13 @@ function loadCompare(idOrProduct){
     const stu = r.stuOn
       ? `<span class="stu-tag">${p.stu && !r.plat.used && p.stu<0.93 ? '教育优惠 '+Math.round((1-p.stu)*100)+'折' : r.plat.stuLabel}</span>`
       : (r.plat.stuLabel ? `<span style="color:#94a3b8;font-size:12px">无</span>` : '');
-    const href = {jd:'https://www.jd.com',tb:'https://www.taobao.com',pdd:'https://mobile.yangkeduo.com',vip:'https://www.vip.com',dw:'https://www.dewu.com',xy:'https://www.goofish.com'}[r.plat.key] || '#';
+    // 各平台商品搜索直达链接(带商品关键词)
+    const kw = encodeURIComponent((p.brand ? p.brand + ' ' : '') + p.name);
+    const href = {
+      jd:'https://search.jd.com/Search?keyword=', tb:'https://s.taobao.com/search?q=',
+      pdd:'https://mobile.yangkeduo.com/search_result.html?search_key=', vip:'https://search.vip.com/search.php?keyword=',
+      dw:'https://www.dewu.com/search?keyword=', xy:'https://www.goofish.com/search?keyword='
+    }[r.plat.key] + kw;
     return `
     <tr class="${isBest?'best':''}${r.plat.used?' used':''}">
       <td class="ch-name">${r.plat.icon} ${r.plat.name}</td>
