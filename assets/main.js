@@ -171,7 +171,7 @@ function cardPrices(p){
   });
 }
 function renderGrid(){
-  const list = P.filter(p=>(curCat==='全部'||p.cat===curCat) && (!curTerm || p.name.includes(curTerm) || p.cat.includes(curTerm) || p.sell.includes(curTerm)));
+  const list = filtered();
   grid.innerHTML = list.map(p=>{
     const ps = cardPrices(p);
     const newPs = ps.filter(x=>!x.used);
