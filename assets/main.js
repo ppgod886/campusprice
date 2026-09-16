@@ -219,6 +219,75 @@ P.push(...EXTRA2.map((r,i)=>({
   sell: `${r[1]} ${r[2]},学生党高频购买`
 })));
 
+/* ---------- 逐商品专属图(按名称精确匹配,未命中的沿用品类图池) ---------- */
+const IMG3 = {
+  phone2:'1592750475338-74b7b21085ab', phone3:'1616348436168-de43ad0db179',
+  laptop2:'1496181133206-80ce9b88a853', laptop3:'1541807084-5c52b6b3adef',
+  watch:'1546868871-7041f2a55e12', canvas:'1525966222134-fcfa99b8ae77',
+  tee3:'1576566588028-4147f3842f27', suit:'1594938298603-c8148c4dae35',
+  jeans:'1542272604-787c3835535d', bread:'1549931319-a545dcf3bc73',
+  noodles:'1612929633738-8fe44f7ec841'
+};
+const ALLIMG = Object.assign({}, IMG, IMG2, IMG3);
+const PER_PRODUCT = {
+  '无线蓝牙耳机':'earbuds','快充充电宝 20000mAh':'bank','轻薄笔记本电脑':'laptop','桌面护眼台灯':'lamp',
+  '宿舍折叠收纳箱':'storage','全棉床上三件套':'bed','迷你加湿器':'aroma','大容量保温杯':'bottle',
+  '氨基酸洗面奶':'cleanser','保湿面霜':'cream','考研英语全套资料':'books','桌面文具套装':'stationery',
+  '春秋百搭运动鞋':'sneaker','大容量双肩背包':'backpack','便携晴雨伞':'umbrella','机械键盘':'keyboard',
+  '网课平板 iPad':'ipad','宿舍小电煮锅':'kitchen2','床头挂篮置物架':'totes','氨基酸洗发水':'shampoo',
+  '防晒霜':'cosmetics','加厚笔记本套装':'notebook','荧光笔记号笔套装':'stationery','加厚瑜伽垫':'yoga',
+  '速干运动T恤':'blacktee',
+  '圆领纯色T恤':'tee','纯棉法兰绒衬衫':'denim','柔软针织开衫':'knit','印花短袖T恤':'tee3',
+  '水洗牛仔衬衫':'denim','宽松针织毛衣':'knit','oversize短袖':'tee3','修身长袖衬衫':'denim',
+  '运动长袖T恤':'tee','纯棉家居针织衫':'knit',
+  'Air 缓震跑步鞋':'red','赤兔跑步鞋':'red','KT 气垫篮球鞋':'colorful','经典熊猫鞋':'white',
+  '经典小白鞋':'white','三叶草板鞋':'pastel','空军一号板鞋':'pastel','复古老爹鞋':'colorful',
+  '切尔西马丁靴':'boots','英伦风短靴':'boots','通勤乐福鞋':'loafers','经典高帮帆布鞋':'canvas',
+  '桌面收纳盒':'storage','抽屉式收纳箱':'storage','多层置物架':'storage','洗衣液 2kg':'clean',
+  '洗洁精家庭装':'clean','香皂 4 块装':'clean','滚筒粘毛器':'clean',
+  '薯片追剧整箱':'chips','鲜虾片家庭装':'chips','巧克力分享装':'choco','棒棒糖袋装':'candy',
+  '每日坚果 30 包':'choco','纯牛奶 24 盒':'milk','气泡水 15 瓶':'can','辣条混装大礼包':'chips',
+  '纯牛奶 16 盒':'milk','酸奶 8 杯':'yogurt','鲜酪乳 6 杯':'yogurt','饮用水 24 瓶':'water',
+  '冰红茶 15 瓶':'can','凉茶 12 罐':'can','NFC 果汁 1L':'juice','红烧牛肉面 12 连包':'noodles',
+  '虎皮凤爪':'ribs','自热火锅':'kitchen2','零食大礼包':'candy','猪肉脯 200g':'ribs',
+  '软面包 1kg':'bread','蒸蛋糕 1kg':'bread','软面包 500g':'bread',
+  'Redmi 手机':'phone','畅玩手机':'phone2','K 系列手机':'phone3','Y 系列手机':'phone',
+  'iPhone SE':'phone3','小新笔记本':'laptop2','灵越笔记本':'laptop3','顽石笔记本':'laptop',
+  'MatePad 平板':'ipad','平板 8 Pro':'ipad','FreeBuds 耳机':'earbuds','AirPods 2':'earbuds',
+  'G304 无线鼠标':'mouse','G102 电竞鼠标':'mouse2','小爱音箱':'speaker','移动电源 2万毫安':'bank',
+  '手环 9':'watch',
+  '纯棉四件套':'bed','冬被加厚':'bed','便携榨汁机':'juice','桌面小风扇':'lamp',
+  'LED 台灯':'lamp','护眼台灯':'lamp','台灯 Pro':'lamp',
+  '收纳袋三件套':'totes','真空压缩袋':'storage','晾衣绳':'totes',
+  '红宝石精华':'serum','舒敏保湿霜':'cream','复颜面膜':'cosmetics','SOD 蜜':'serum',
+  '牙膏三支装':'dental','软毛牙刷两支':'dental','乳液修护洗发水':'shampoo','沐浴露 1L':'shampoo',
+  '洗脸巾 100 抽':'cosmetics','小细跟唇釉':'cosmetics','空气蜜粉':'cosmetics',
+  '迷你订书机':'stationery','P500 中性笔 3 支':'pen2','狩猎者钢笔':'pen2','便利贴组合':'stationery',
+  '四六级真题':'books','考研数学全书':'books','四六级词汇':'books','开学文具大礼包':'stationery',
+  '荧光笔 6 色':'stationery','科学计算器':'stationery','错题打印纸 2 卷':'books',
+  '防滑篮球':'basketball','可拆卸哑铃':'gym','瑜伽球':'yoga','运动短裤':'workout',
+  '速干训练 T':'workout','运动袜 5 双':'socks','折叠晴雨伞':'umbrella','速干运动毛巾':'workout',
+  '高腰休闲裤':'pants','圆领长袖 T':'tee','摇粒绒开衫':'knit','牛仔外套':'jkt',
+  '基础连帽卫衣':'sweat','休闲直筒裤':'pants','针织开衫':'knit','棉质圆领 T':'tee',
+  '休闲卫裤':'pants','牛仔夹克':'jkt','印花连帽卫衣':'sweat','休闲西装裤':'pants',
+  '纯棉套头卫衣':'sweat','休闲短裤':'tee','柔软针织衫':'knit','长袖衬衫':'denim',
+  '经典 Polo 衫':'tee','宽松休闲裤':'pants','有机棉卫衣':'sweat','运动卫裤':'pants',
+  '空气感衬衫':'denim','条纹长袖 T':'tee','圆领针织衫':'knit','飞行员夹克':'jkt',
+  '连帽拉链外套':'sweat','法兰绒家居裤':'pants','打底长袖 T':'tee','速干训练短袖':'tee',
+  '荷叶边衬衫':'denim','灯芯绒衬衫':'denim',
+  '动力巢跑步鞋':'red','轻量运动鞋':'red','休闲板鞋':'white','慢跑鞋':'red',
+  'Old Skool 滑板鞋':'canvas','复古板鞋':'pastel','轻量跑步鞋':'red','574 经典款':'white',
+  '通勤单鞋':'loafers','商务皮鞋':'loafers','正装皮鞋':'loafers','一脚蹬懒人鞋':'white',
+  '复古马丁靴':'boots','切尔西短靴':'boots','防滑篮球鞋':'colorful','户外徒步鞋':'dark',
+  '登山越野鞋':'dark','防滑篮球':'basketball','可拆卸哑铃':'gym','瑜伽球':'yoga',
+  '运动短裤':'workout','速干训练 T':'workout','运动袜 5 双':'socks','折叠晴雨伞':'umbrella',
+  '速干运动毛巾':'workout'
+};
+P.forEach(p => {
+  const k = PER_PRODUCT[p.name];
+  if (k && ALLIMG[k]) p.img = ALLIMG[k];
+});
+
 /* ---------- 平台档案(multi: 相对标价倍率 / student: 学生折上折) ---------- */
 const PLATS = [
   {key:'jd',  name:'京东',        icon:'🐶',  multi:1.00, ship:'次日达',      promos:['满199减20','PLUS会员95折'], student:0.95, stuLabel:'学生认证95折'},
