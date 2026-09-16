@@ -234,7 +234,8 @@ function trendSeries(p){
 
 /* ---------- 工具 ---------- */
 const $ = s => document.querySelector(s);
-const imgUrl = (id,w)=>`https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=60`;
+/* 图片已自托管在仓库 assets/img/ 下,与网站同域,避免第三方图床加载失败 */
+const imgUrl = (id,w)=>`assets/img/${id}.jpg`;
 /* 图片加载失败自动重试一次(应对网络抖动),重试仍失败才降级为图标 */
 window.imgErr = function(img){
   if (!img.dataset.retry){
