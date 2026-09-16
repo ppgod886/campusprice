@@ -235,6 +235,15 @@ function trendSeries(p){
 /* ---------- 工具 ---------- */
 const $ = s => document.querySelector(s);
 const imgUrl = (id,w)=>`https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=60`;
+/* 图片加载失败自动重试一次(应对网络抖动),重试仍失败才降级为图标 */
+window.imgErr = function(img){
+  if (!img.dataset.retry){
+    img.dataset.retry = '1';
+    setTimeout(()=>{ img.src = img.src; }, 1500);
+  } else {
+    img.parentElement.classList.add('noimg');
+  }
+};
 const fmt = n => '¥' + (n >= 100 ? Math.round(n) : Math.round(n*10)/10);
 function priceFor(p, plat, idx, student){
   let v = p.base * plat.multi * (0.95 + prand(p.id*53 + idx*29)*0.1);
@@ -279,7 +288,7 @@ function renderGrid(){
     return `
     <article class="card" data-id="${p.id}">
       <div class="card-photo${p.img ? '' : ' noimg'}" data-emoji="${p.emoji}">
-        ${p.img ? `<img src="${imgUrl(p.img, 420)}" alt="${p.name}" loading="lazy" onerror="this.parentElement.classList.add('noimg')">` : ''}
+        ${p.img ? `<img src="${imgUrl(p.img, 420)}" alt="${p.name}" loading="lazy" onerror="imgErr(this)">` : ''}
         <span class="save-badge">到手约省 ${save}%</span>
       </div>
       <h3 class="card-name">${p.brand ? p.brand + ' · ' : ''}${p.name}</h3>
