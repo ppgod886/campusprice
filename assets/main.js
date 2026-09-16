@@ -238,9 +238,10 @@ const $ = s => document.querySelector(s);
 const imgUrl = (id,w)=>`assets/img/${id}.jpg`;
 /* 图片加载失败自动重试一次(应对网络抖动),重试仍失败才降级为图标 */
 window.imgErr = function(img){
-  if (!img.dataset.retry){
-    img.dataset.retry = '1';
-    setTimeout(()=>{ img.src = img.src; }, 1500);
+  const n = +(img.dataset.retry || 0);
+  if (n < 3){
+    img.dataset.retry = String(n + 1);
+    setTimeout(()=>{ img.src = img.src + (img.src.indexOf('?')>-1?'&':'?') + 'r=' + n; }, 600 + n * 900);
   } else {
     img.parentElement.classList.add('noimg');
   }
