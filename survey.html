@@ -192,25 +192,20 @@ document.getElementById('submitBtn').addEventListener('click', async (e)=>{
   });
   const body = pairs.map(([k,v]) => esc(k) + '=' + esc(v)).join('&');
 
-  let autoOk = false;
+  // no-cors 发送:请求必然发出(响应不可读),送达后在站长后台可见
   try {
-    const r = await fetch('https://xuanpinhub.netlify.app/', {
+    fetch('https://xuanpinhub.netlify.app/', {
       method:'POST',
+      mode:'no-cors',
       headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body: body.toString()
-    });
-    autoOk = r.ok;
-  } catch(e){ autoOk = false; }
+      body
+    }).catch(()=>{});
+  } catch(e){}
 
-  const doneEl = document.getElementById('done');
-  if (autoOk){
-    doneEl.querySelector('h2').textContent = '提交成功,感谢反馈!🎉';
-    doneEl.querySelector('p').innerHTML = '你的答案已自动送达,我们会认真阅读每一条反馈!<br>也欢迎把问卷转发给更多同学~';
-    document.getElementById('summary').style.display = 'none';
-    document.getElementById('copyBtn').style.display = 'none';
-  } else {
-    document.getElementById('summary').textContent = s;
-  }
+  // 乐观提示 + 保留复制兜底
+  doneEl.querySelector('h2').textContent = '提交成功,感谢反馈!🎉';
+  doneEl.querySelector('p').innerHTML = '你的答案已提交,我们会认真阅读每一条反馈!<br>如果站长迟迟没收到,可点下方按钮把结果再发一份给站长~';
+  document.getElementById('summary').textContent = s;
   document.getElementById('form').style.display = 'none';
   document.querySelector('.bar').style.display = 'none';
   doneEl.style.display = 'block';
