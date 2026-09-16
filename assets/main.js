@@ -54,6 +54,63 @@ const P = [
    sell:'体测跑步不闷汗,快干轻薄'}
 ];
 
+/* ---------- 品牌扩充商品(主流品牌覆盖) ---------- */
+const IMG = {
+  tee:'1521572163474-6864f9cf17ab', denim:'1596755094514-f87e34085b2c', knit:'1434389677669-e08b4cac3105',
+  red:'1542291026-7eec264c27ff', white:'1600185365483-26d7a4cc7519', pastel:'1595950653106-6c9ebd614d3a',
+  colorful:'1560769629-975ec94e6a86', boots:'1608256246200-53e635b5b65f', loafers:'1543163521-1bf539c55dd2',
+  storage:'1584622650111-993a426fbf0a', clean:'1563453392212-326f5e854473',
+  chips:'1599490659213-e2b9527bd087', candy:'1621939514649-280e2ee25f60'
+};
+const CAT_EMOJI = {'服饰穿搭':'👕','鞋靴':'👟','生活日用':'🧽','食品饮料':'🍪'};
+/* [品类, 品牌, 品名, 参考价, 图] */
+const EXTRA = [
+  ['服饰穿搭','优衣库','圆领纯色T恤',79,'tee'],
+  ['服饰穿搭','优衣库','纯棉法兰绒衬衫',149,'denim'],
+  ['服饰穿搭','优衣库','柔软针织开衫',199,'knit'],
+  ['服饰穿搭','ZARA','印花短袖T恤',129,'tee'],
+  ['服饰穿搭','ZARA','水洗牛仔衬衫',199,'denim'],
+  ['服饰穿搭','H&M','宽松针织毛衣',159,'knit'],
+  ['服饰穿搭','太平鸟','oversize短袖',139,'tee'],
+  ['服饰穿搭','海澜之家','修身长袖衬衫',159,'denim'],
+  ['服饰穿搭','李宁','运动长袖T恤',119,'tee'],
+  ['服饰穿搭','无印良品','纯棉家居针织衫',159,'knit'],
+  ['鞋靴','耐克','Air 缓震跑步鞋',599,'red'],
+  ['鞋靴','李宁','赤兔跑步鞋',329,'red'],
+  ['鞋靴','安踏','KT 气垫篮球鞋',429,'colorful'],
+  ['鞋靴','斯凯奇','经典熊猫鞋',399,'white'],
+  ['鞋靴','回力','经典小白鞋',79,'white'],
+  ['鞋靴','阿迪达斯','三叶草板鞋',599,'pastel'],
+  ['鞋靴','耐克','空军一号板鞋',799,'pastel'],
+  ['鞋靴','斐乐','复古老爹鞋',699,'colorful'],
+  ['鞋靴','百丽','切尔西马丁靴',399,'boots'],
+  ['鞋靴','热风','英伦风短靴',299,'boots'],
+  ['鞋靴','红蜻蜓','通勤乐福鞋',259,'loafers'],
+  ['鞋靴','匡威','经典高帮帆布鞋',429,'white'],
+  ['生活日用','名创优品','桌面收纳盒',19.9,'storage'],
+  ['生活日用','京东京造','抽屉式收纳箱',39.9,'storage'],
+  ['生活日用','名创优品','多层置物架',29.9,'storage'],
+  ['生活日用','蓝月亮','洗衣液 2kg',39.9,'clean'],
+  ['生活日用','立白','洗洁精家庭装',12.9,'clean'],
+  ['生活日用','舒肤佳','香皂 4 块装',19.9,'clean'],
+  ['生活日用','京东京造','滚筒粘毛器',9.9,'clean'],
+  ['食品饮料','乐事','薯片追剧整箱',49.9,'chips'],
+  ['食品饮料','上好佳','鲜虾片家庭装',29.9,'chips'],
+  ['食品饮料','德芙','巧克力分享装',59.9,'candy'],
+  ['食品饮料','阿尔卑斯','棒棒糖袋装',19.9,'candy'],
+  ['食品饮料','三只松鼠','每日坚果 30 包',79,''],
+  ['食品饮料','伊利','纯牛奶 24 盒',59.9,''],
+  ['食品饮料','元气森林','气泡水 15 瓶',69.9,''],
+  ['食品饮料','卫龙','辣条混装大礼包',26.9,''],
+  ['数码3C','小米','手环 9',249,''],
+  ['数码3C','罗技','G102 电竞鼠标',129,'']
+];
+P.push(...EXTRA.map((r,i)=>({
+  id: 100 + i, cat: r[0], brand: r[1], name: r[2], base: r[3],
+  emoji: CAT_EMOJI[r[0]] || '🛒', img: r[4] ? IMG[r[4]] : '',
+  sell: `${r[1]} ${r[2]},学生党高频购买`
+})));
+
 /* ---------- 平台档案(multi: 相对标价倍率 / student: 学生折上折) ---------- */
 const PLATS = [
   {key:'jd',  name:'京东',        icon:'🐶',  multi:1.00, ship:'次日达',      promos:['满199减20','PLUS会员95折'], student:0.95, stuLabel:'学生认证95折'},
@@ -88,8 +145,23 @@ function priceFor(p, plat, idx, student){
 }
 
 /* ---------- 好物榜单 ---------- */
-let curCat = '全部', curTerm = '';
+let curCat = '全部', curTerm = '', curBrand = '全部品牌';
 const grid = $('#productGrid'), resultNote = $('#resultNote');
+
+/* 品牌筛选项 */
+const brandSel = $('#brandSel');
+const BRANDS = [...new Set(P.filter(p=>p.brand).map(p=>p.brand))].sort((a,b)=>a.localeCompare(b,'zh'));
+brandSel.innerHTML = '<option value="全部品牌">全部品牌</option><option value="精选自营">精选自营(无品牌)</option>'
+  + BRANDS.map(b=>`<option value="${b}">${b}</option>`).join('');
+brandSel.addEventListener('change', ()=>{ curBrand = brandSel.value; renderGrid(); });
+
+function filtered(){
+  return P.filter(p=>
+    (curCat==='全部'||p.cat===curCat) &&
+    (curBrand==='全部品牌' || (curBrand==='精选自营' ? !p.brand : p.brand===curBrand)) &&
+    (!curTerm || p.name.includes(curTerm) || p.cat.includes(curTerm) || p.sell.includes(curTerm) || (p.brand||'').includes(curTerm))
+  );
+}
 
 function cardPrices(p){
   /* 卡片上显示 京东/淘宝/拼多多/闲鱼 到手价(二手不叠加学生折扣) */
@@ -112,7 +184,7 @@ function renderGrid(){
         ${p.img ? `<img src="${imgUrl(p.img, 420)}" alt="${p.name}" loading="lazy" onerror="this.parentElement.classList.add('noimg')">` : ''}
         <span class="save-badge">到手约省 ${save}%</span>
       </div>
-      <h3 class="card-name">${p.name}</h3>
+      <h3 class="card-name">${p.brand ? p.brand + ' · ' : ''}${p.name}</h3>
       <p class="card-sell">${p.sell}</p>
       <div class="card-p4">
         ${ps.map(x=>`<div class="p4 ${!x.used && x.price===min ? 'best':''}"><div class="pn">${x.name}</div><div class="pv">${fmt(x.price)}</div></div>`).join('')}
@@ -122,7 +194,7 @@ function renderGrid(){
   }).join('');
   resultNote.textContent = curTerm
     ? `🔍 搜索“${curTerm}”找到 ${list.length} 件好物 · 价格为演示样例`
-    : `📌 按大学生购买热度排序,共 ${list.length} 件好物 · 绿色为四平台最低到手价`;
+    : `📌 ${curCat}${curBrand!=='全部品牌' ? ' · ' + curBrand : ''}共 ${list.length} 件好物 · 绿色为四平台最低到手价`;
 }
 grid.addEventListener('click', e=>{
   const card = e.target.closest('.card'); if(!card) return;
@@ -134,6 +206,7 @@ $('#tabs').addEventListener('click', e=>{
   document.querySelectorAll('#tabs .tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   curCat = btn.dataset.cat; curTerm=''; $('#searchInput').value='';
+  curBrand = '全部品牌'; brandSel.value = '全部品牌';
   renderGrid();
 });
 
@@ -235,7 +308,7 @@ function renderTrend(p){
 }
 
 const cmpSelect = $('#cmpSelect');
-cmpSelect.innerHTML = P.map(p=>`<option value="${p.id}">${p.name}(${fmt(p.base)})</option>`).join('');
+cmpSelect.innerHTML = P.map(p=>`<option value="${p.id}">${p.brand ? p.brand + ' ' : ''}${p.name}(${fmt(p.base)})</option>`).join('');
 cmpSelect.addEventListener('change', ()=> loadCompare(+cmpSelect.value));
 
 /* ---------- 比价搜索(联想+自定义) ---------- */
