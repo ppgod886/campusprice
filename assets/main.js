@@ -404,6 +404,12 @@ function loadCompare(idOrProduct){
   const p = typeof idOrProduct === 'object' ? idOrProduct : P.find(x=>x.id===idOrProduct);
   $('#cmpSelect').value = p.id;
   $('#cmpCur').innerHTML = `📦 当前比价:<b>${p.emoji} ${p.name}</b>(${p.cat}) · 标价参考 ${fmt(p.base)}`;
+  // 免登录比价工具条(购物党/慢慢买/什么值得买)
+  const pk = encodeURIComponent(p.name);
+  $('#aggBar').innerHTML = '<span class="agg-t">免登录查全网:</span>' +
+    `<a href="https://www.gwdang.com/search/all?keyword=${pk}" target="_blank" rel="noopener">📊 购物党·全网比价</a>` +
+    `<a href="https://tool.manmanbuy.com/historyLowest.aspx?keyword=${pk}" target="_blank" rel="noopener">📉 慢慢买·历史价格</a>` +
+    `<a href="https://search.smzdm.com/?c=home&s=${pk}" target="_blank" rel="noopener">🔥 什么值得买</a>`;
 
   /* 六平台行 */
   const rows = PLATS.map((plat,idx)=>{
