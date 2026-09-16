@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>学省 CampusPrice · 用户体验问卷（约2分钟）</title>
+<meta name="description" content="大学生购物比价网站「学省 CampusPrice」用户调研,12题约2分钟,匿名填写,帮我们把网站做得更好用。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+<style>
+:root{--bg:#f7f9fc;--card:#fff;--line:rgba(15,23,42,.1);--text:#17233a;--muted:#5f6f86;--blue:#2563eb;--blue-d:#1d4ed8;--green:#059669;--red:#dc2626;--fill:#eef3fa}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.65}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px 110px}
+header{background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;padding:34px 20px 28px;text-align:center;border-radius:0 0 22px 22px}
+header .tag{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;font-size:12.5px;padding:3px 14px;margin-bottom:12px}
+header h1{font-size:21px;font-weight:900;line-height:1.4}
+header p{font-size:13px;opacity:.92;margin-top:8px}
+.intro{background:var(--fill);border:1px solid rgba(37,99,235,.18);border-radius:14px;padding:14px 16px;font-size:13.5px;color:#3d4c63;margin:18px 0 6px;line-height:1.8}
+.intro b{color:var(--blue-d)}
+.qcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin-top:16px;box-shadow:0 4px 18px rgba(15,23,42,.05);scroll-margin-top:16px}
+.qcard.err{border-color:rgba(220,38,38,.55);box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+.q-idx{font-size:12px;font-weight:800;color:var(--blue);letter-spacing:1px}
+.q-type{float:right;font-size:11.5px;font-weight:800;padding:1px 9px;border-radius:999px}
+.q-type.single{background:rgba(37,99,235,.1);color:#1d4ed8}
+.q-type.multi{background:rgba(234,88,12,.1);color:#c2410c}
+.q-type.open{background:rgba(5,150,105,.1);color:#047857}
+.q-title{font-size:15.5px;font-weight:800;margin:6px 0 12px;line-height:1.6}
+.opts{display:grid;gap:9px}
+.opt{display:flex;align-items:flex-start;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:14.5px;cursor:pointer;transition:.15s;background:#fbfcfe}
+.opt:active{transform:scale(.985)}
+.opt .mark{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:2px solid #b6c2d4;margin-top:2px;position:relative;background:#fff}
+.opt.multi .mark{border-radius:6px}
+.opt .txt{line-height:1.55}
+.opt.sel{border-color:var(--blue);background:rgba(37,99,235,.06)}
+.opt.sel .mark{border-color:var(--blue);background:var(--blue)}
+.opt.sel .mark::after{content:"";position:absolute;left:5.5px;top:2.5px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(42deg)}
+textarea{width:100%;min-height:110px;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14.5px;font-family:inherit;color:var(--text);resize:vertical;outline:none;background:#fbfcfe}
+textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));z-index:50}
+.bar .inner{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.prog{flex:1}
+.prog .track{height:8px;border-radius:999px;background:rgba(15,23,42,.08);overflow:hidden}
+.prog .fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#2563eb,#0ea5e9);transition:.3s}
+.prog .txt{font-size:11.5px;color:var(--muted);margin-bottom:5px}
+button.submit{border:none;border-radius:999px;background:linear-gradient(90deg,#2563eb,#0ea5e9);color:#fff;font-weight:800;font-size:15px;padding:12px 30px;white-space:nowrap;box-shadow:0 6px 18px rgba(37,99,235,.35)}
+button.submit:active{transform:scale(.97)}
+.done{display:none;text-align:center;padding:34px 18px}
+.done .ok{width:64px;height:64px;border-radius:50%;background:rgba(5,150,105,.12);color:var(--green);font-size:34px;line-height:64px;margin:0 auto 14px}
+.done h2{font-size:19px;margin-bottom:8px}
+.done p{font-size:13.5px;color:var(--muted);margin-bottom:16px}
+.summary{background:#fff;border:1px dashed rgba(37,99,235,.45);border-radius:14px;padding:14px;text-align:left;font-size:13px;line-height:1.8;color:#3d4c63;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto;margin-bottom:16px}
+.btn-copy{display:inline-block;border:none;border-radius:999px;background:linear-gradient(90deg,#059669,#0ea5e9);color:#fff;font-weight:800;font-size:15px;padding:12px 36px;margin-bottom:10px}
+.btn-back{display:inline-block;font-size:13px;color:var(--muted);text-decoration:underline}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#17233a;color:#fff;font-size:13.5px;padding:9px 22px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:86vw;text-align:center}
+.toast.show{opacity:.96}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tag">📋 用户调研 · 匿名填写</div>
+  <h1>「学省 CampusPrice」<br>网站体验问卷</h1>
+  <p>共 12 题 · 约 2 分钟 · 选择题为主,最后一题选填</p>
+</header>
+
+<div class="wrap">
+  <div class="intro">
+    亲爱的同学:感谢抽空参与调研!<b>「学省 CampusPrice」</b>是一个面向大学生的购物比价网站(同款商品京东/淘宝/拼多多/唯品会/得物/闲鱼六平台比价、价格波动、优惠日历、学生认证优惠汇总)。你的反馈将直接决定我们接下来做什么。建议先打开<a href="https://ppgod886.github.io/campusprice/" style="color:#1d4ed8">网站体验 1 分钟</a>,再回来答题,感受更准确~
+  </div>
+  <div id="form"></div>
+  <div class="done" id="done">
+    <div class="ok">✓</div>
+    <h2>提交成功,感谢反馈!</h2>
+    <p>请点击下方按钮复制你的答案,<br>然后把结果<b style="color:#1d4ed8">粘贴发到朋友圈评论区 / 发给站长</b>,我们就收到啦!</p>
+    <div class="summary" id="summary"></div>
+    <button class="btn-copy" id="copyBtn">📋 一键复制结果</button>
+    <br><a class="btn-back" href="https://ppgod886.github.io/campusprice/">← 返回网站首页</a>
+  </div>
+</div>
+
+<div class="bar"><div class="inner">
+  <div class="prog"><div class="txt" id="progTxt">已答 0 / 11</div><div class="track"><div class="fill" id="progFill"></div></div></div>
+  <button class="submit" id="submitBtn">提交</button>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const QS = [
+  {id:1, type:'single', t:'你的身份是', opts:['在校大学生(本科/专科)','研究生','已毕业','其他']},
+  {id:2, type:'single', t:'你平时的网购频率', opts:['几乎每天','每周 1-3 次','每月 1-3 次','很少网购']},
+  {id:3, type:'single', t:'网购前你会对比不同平台的价格吗', opts:['每次都会比价','买大件/贵重物品才比价','偶尔比一下','基本不比,直接买']},
+  {id:4, type:'single', t:'打开网站看到首页的第一印象', opts:['眼前一亮,愿意继续探索','清晰舒服,还不错','一般,没什么特别','不喜欢/看不懂']},
+  {id:5, type:'single', t:'你对网站界面风格的整体评价', opts:['简洁美观','中规中矩','略显简陋','信息太杂、有点乱']},
+  {id:6, type:'single', t:'不看说明的情况下,你能独立找到并使用「跨平台比价」功能吗', opts:['秒懂,直接上手','摸索几下能找到','需要人指导','找不到/看不懂']},
+  {id:7, type:'single', t:'以下哪个功能对你最有吸引力', opts:['好物榜单(高频好物四平台价格)','跨平台比价(六平台到手价对比)','价格波动+入手建议','优惠日历','学生认证优惠汇总']},
+  {id:8, type:'single', t:'「价格波动+入手建议」(如:当前比全年最低价高13%,可蹲618)你觉得', opts:['非常实用,正是我需要的','有一定参考价值','说不上有没有用','看不太懂']},
+  {id:9, type:'multi', max:3, t:'你最希望网站接下来增加什么(最多选3项)', opts:['更多商品品类','接入真实实时价格','优惠券/红包汇总','快递运费比价','二手闲置专区','商品口碑/评价聚合','降价提醒','其他(最后一题补充)']},
+  {id:10, type:'multi', t:'什么场景下你会使用这个网站', opts:['买手机电脑等大件前比价','开学季置办宿舍用品','蹲大促(618/双11)前做功课','找学生专属优惠','想入手二手时参考行情','基本不会用']},
+  {id:11, type:'single', t:'你愿意把这个网站推荐给同学/室友吗', opts:['肯定会','可能会','不确定','不会']},
+  {id:12, type:'open', t:'你对这个网站还有什么建议或吐槽(选填)'}
+];
+const ans = {};   // {qid: [选中文本]} 或 {12: '文字'}
+const form = document.getElementById('form');
+
+QS.forEach(q=>{
+  const card = document.createElement('div');
+  card.className = 'qcard'; card.id = 'q' + q.id;
+  const typeHtml = q.type==='single' ? '<span class="q-type single">单选</span>'
+                 : q.type==='multi'  ? `<span class="q-type multi">多选${q.max?'·限'+q.max+'项':''}</span>`
+                 : '<span class="q-type open">选填</span>';
+  let inner = `<div class="q-idx">Q${q.id}</div>${typeHtml}<div class="q-title">${q.t}</div>`;
+  if (q.type === 'open'){
+    inner += `<textarea id="ta${q.id}" placeholder="畅所欲言,吐槽也欢迎~(选填)"></textarea>`;
+    card.innerHTML = inner;
+    form.appendChild(card);
+    setTimeout(()=>{ document.getElementById('ta'+q.id).addEventListener('input', e=>{ ans[q.id]=e.target.value; updateProg(); }); },0);
+  } else {
+    inner += `<div class="opts">` + q.opts.map((o,i)=>
+      `<div class="opt ${q.type}" data-i="${i}"><span class="mark"></span><span class="txt">${o}</span></div>`).join('') + `</div>`;
+    card.innerHTML = inner;
+    form.appendChild(card);
+    card.addEventListener('click', e=>{
+      const opt = e.target.closest('.opt'); if(!opt) return;
+      const i = +opt.dataset.i;
+      if (q.type === 'single'){
+        card.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+        opt.classList.add('sel');
+        ans[q.id] = [q.opts[i]];
+      } else {
+        const cur = ans[q.id] || [];
+        const pos = cur.indexOf(q.opts[i]);
+        if (pos >= 0){ cur.splice(pos,1); opt.classList.remove('sel'); }
+        else {
+          if (q.max && cur.length >= q.max){ toast(`最多选 ${q.max} 项哦`); return; }
+          cur.push(q.opts[i]); opt.classList.add('sel');
+        }
+        ans[q.id] = cur;
+      }
+      updateProg();
+    });
+  }
+});
+
+const REQUIRED = QS.filter(q=>q.type!=='open').map(q=>q.id);
+function answeredCount(){ return REQUIRED.filter(id=>ans[id] && ans[id].length).length; }
+function updateProg(){
+  const n = answeredCount();
+  document.getElementById('progTxt').textContent = `已答 ${n} / ${REQUIRED.length}`;
+  document.getElementById('progFill').style.width = (n/REQUIRED.length*100) + '%';
+}
+updateProg();
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+document.getElementById('submitBtn').addEventListener('click', ()=>{
+  const missing = REQUIRED.filter(id=>!ans[id] || !ans[id].length);
+  if (missing.length){
+    const card = document.getElementById('q'+missing[0]);
+    card.classList.add('err');
+    card.scrollIntoView({behavior:'smooth', block:'center'});
+    toast(`还有 ${missing.length} 题没答完,已帮你定位到第一题`);
+    setTimeout(()=>card.classList.remove('err'), 2500);
+    return;
+  }
+  let s = '【学省CampusPrice 问卷反馈】\n';
+  QS.forEach(q=>{
+    if (q.type === 'open'){
+      s += `${q.id}.建议: ${(ans[q.id]||'').trim() || '(未填写)'}\n`;
+    } else {
+      s += `${q.id}.${q.t.slice(0,18)}: ${ans[q.id].join(' | ')}\n`;
+    }
+  });
+  s += '—— 来自朋友圈用户调研';
+  document.getElementById('summary').textContent = s;
+  document.getElementById('form').style.display = 'none';
+  document.querySelector('.bar').style.display = 'none';
+  document.getElementById('done').style.display = 'block';
+  window.scrollTo({top:0});
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    const done = () => { this.textContent = '✓ 已复制,去粘贴发给站长吧'; toast('已复制!粘贴给站长即可'); };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(s).then(done).catch(fallback);
+    } else fallback();
+    function fallback(){
+      const ta = document.createElement('textarea');
+      ta.value = s; ta.style.cssText='position:fixed;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); done(); }catch(e){ toast('请长按下方文字手动复制'); }
+      ta.remove();
+    }
+  });
+});
+</script>
+</body>
+</html>
