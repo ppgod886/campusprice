@@ -69,7 +69,7 @@ function priceFor(p, plat, idx, student){
 
 /* ---------- 好物榜单 ---------- */
 let curCat = '全部', curTerm = '';
-const grid = $('#grid'), resultNote = $('#resultNote');
+const grid = $('#productGrid'), resultNote = $('#resultNote');
 
 function cardPrices(p){
   /* 卡片上显示 京东/淘宝/拼多多/闲鱼 到手价(二手不叠加学生折扣) */
