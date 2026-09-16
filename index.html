@@ -3,37 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>学省 CampusPrice · 任意商品一键直达拼多多/淘宝/京东比价</title>
-<meta name="description" content="大学生的跨平台购物比价工具:输入任意商品,一键直达拼多多、淘宝/天猫、京东、唯品会、得物、闲鱼的实时搜索与实时价格;另有 200+ 校园高频好物估算对比、学生认证优惠汇总与全年促销日历。">
-<meta name="keywords" content="大学生比价,拼多多比价,淘宝比价,京东比价,校园购物,学生优惠,开学季,宿舍好物,省钱清单">
-<meta name="theme-color" content="#2563eb">
-<link rel="canonical" href="https://ppgod886.github.io/campusprice/">
-
-<!-- 分享卡片 -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="学省 CampusPrice · 任意商品一键直达六平台比价">
-<meta property="og:description" content="输入任意商品,一键直达拼多多/淘宝/京东/唯品会/得物/闲鱼的实时价格页;200+ 校园好物估算对比 + 学生认证优惠 + 促销日历。">
-<meta property="og:url" content="https://ppgod886.github.io/campusprice/">
-<meta property="og:image" content="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=70">
-<meta name="twitter:card" content="summary_large_image">
-
+<title>学省 CampusPrice · 大学生购物比价与优惠助手</title>
+<meta name="description" content="给大学生的跨平台购物比价工具:京东/淘宝/拼多多/闲鱼/得物同款比价,学生认证优惠汇总,历史价格波动与促销日历,让每一分生活费都花在刀刃上。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
 <link rel="stylesheet" href="assets/style.css">
-
-<!-- 结构化数据:让搜索引擎正确理解这是个比价工具站 -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "学省 CampusPrice",
-  "url": "https://ppgod886.github.io/campusprice/",
-  "applicationCategory": "ShoppingApplication",
-  "operatingSystem": "Web",
-  "inLanguage": "zh-CN",
-  "description": "面向大学生的跨平台购物比价工具:输入任意商品关键词,一键直达拼多多、淘宝/天猫、京东、唯品会、得物、闲鱼的实时搜索页。",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" }
-}
-</script>
 </head>
 <body>
 
@@ -42,179 +15,90 @@
   <div class="nav-inner container">
     <a class="logo" href="#home">🎓 学省 <span>CampusPrice</span></a>
     <div class="nav-links" id="navMenu">
-      <a href="#direct">全网直达</a>
       <a href="#grid">好物榜单</a>
-      <a href="#compare">估算比价</a>
-      <a href="#calendar">促销日历</a>
-      <a href="#student">学生认证</a>
-      <button class="nav-save" id="navSave" type="button">★ 省钱清单<span class="save-count" style="display:none">0</span></button>
+      <a href="#compare">跨平台比价</a>
+      <a href="#calendar">优惠日历</a>
+      <a href="#student">学生认证优惠</a>
+      <a class="nav-cta" href="#grid">开始省钱</a>
     </div>
-    <button class="burger" id="burger" aria-label="打开菜单" aria-expanded="false">☰</button>
+    <button class="burger" id="burger" aria-label="菜单">☰</button>
   </div>
 </nav>
 
 <!-- ============ Hero ============ -->
 <header class="hero" id="home">
   <div class="container hero-inner">
-    <div class="badge reveal">🎒 大学生专属 · 任意商品跨平台比价</div>
-    <h1 class="reveal">想买什么就打什么<br>一键看清<span class="grad">六大平台实时价</span></h1>
-    <p class="hero-sub reveal">
-      输入<strong>任何商品</strong> —— 不只是榜单上这些。学省会为它生成
-      <b>拼多多 · 淘宝/天猫 · 京东 · 唯品会 · 得物 · 闲鱼</b> 的搜索直达入口,
-      点开即可在平台上看当下真实价格。<strong>注意:除京东外,多数平台要求先登录账号才能查看价格</strong>,
-      在浏览器里登录过一次之后,以后点直达就能一步到位。
-    </p>
-
-    <form class="search reveal" id="searchForm" role="search">
-      <label class="sr-only" for="searchInput">搜索商品</label>
-      <input id="searchInput" type="text" placeholder="输入任意商品,如「蓝牙耳机」「收纳箱」「螺蛳粉」…" autocomplete="off" enterkeyhint="search">
-      <button type="submit">🔍 全网比价</button>
-      <div class="search-suggest" id="searchSuggest" role="listbox"></div>
+    <div class="badge reveal">🎒 大学生专属 · 跨平台比价 + 优惠提醒</div>
+    <h1 class="reveal">同款商品,一图看清<span class="grad">全网底价</span></h1>
+    <p class="hero-sub reveal">京东、淘宝、拼多多、闲鱼、得物、唯品会六平台同款比价,叠加学生认证优惠与历史价格波动,让每一分生活费都花在刀刃上。</p>
+    <form class="search reveal" id="searchForm">
+      <input id="searchInput" type="text" placeholder="搜索想买的商品,如「蓝牙耳机」「收纳箱」「考研资料」…" autocomplete="off">
+      <button type="submit">🔍 一键比价</button>
     </form>
-
-    <div class="hero-note reveal">覆盖 6 大平台 · 不做抓取,直达实时价格页 · 200+ 校园好物估算参考</div>
-
+    <div class="hero-note reveal">覆盖 6 大平台 · 含学生认证优惠 · 每月促销节点提醒</div>
     <div class="stats reveal">
-      <div class="stat"><div class="num" id="statPlat" data-count="6" data-suffix="大">0</div><div class="lbl">覆盖电商平台</div></div>
-      <div class="stat"><div class="num" id="statProd" data-count="200" data-suffix="+">0</div><div class="lbl">校园好物收录</div></div>
-      <div class="stat"><div class="num" id="statScene" data-count="6" data-suffix="类">0</div><div class="lbl">校园场景筛选</div></div>
-      <div class="stat"><div class="num" id="statCal" data-count="12" data-suffix="个">0</div><div class="lbl">促销节点提醒</div></div>
+      <div class="stat"><div class="num" data-count="6" data-suffix="大">0</div><div class="lbl">覆盖电商平台</div></div>
+      <div class="stat"><div class="num" data-count="15" data-suffix="+">0</div><div class="lbl">高频好物收录</div></div>
+      <div class="stat"><div class="num" data-count="12" data-suffix="个">0</div><div class="lbl">促销节点提醒</div></div>
+      <div class="stat"><div class="num" data-count="23" data-suffix="%">0</div><div class="lbl">学生平均省幅</div></div>
     </div>
   </div>
 </header>
 
 <main>
-
-<!-- ============ 直达比价(核心) ============ -->
-<section class="direct" id="direct">
-  <div class="container">
-    <div class="sec-head reveal" style="margin-bottom:22px">
-      <div class="kicker">DIRECT · 全网直达</div>
-      <h2>任意商品 <span class="accent">一键直达六大平台实时价</span></h2>
-      <p class="sec-sub">
-        这一块解决"收录不全"的问题:电商平台的商品有上亿种,任何比价站都收录不完,
-        但每个平台<strong>自己的搜索</strong>是完整的。所以我们不复制数据,只把搜索入口做好。
-        <br><strong>先看清楚登录要求:</strong>实测下来只有<strong>京东</strong>免登录就能直接看到价格;
-        闲鱼页面能打开,但商品列表要登录后才加载;拼多多、淘宝、唯品会、得物对未登录访客会先跳到登录页。
-        这是平台自身的要求 —— 在浏览器里登录过一次该平台后,再点直达就能一步到位。
-      </p>
-    </div>
-
-    <div class="direct-box reveal">
-      <div class="direct-head">
-        <div class="direct-kw" id="directKw">输入任意商品,一键直达六大平台</div>
-        <div class="direct-tools">
-          <button class="btn btn-sm" id="copyAll" type="button">📋 复制全部链接</button>
-          <button class="btn btn-sm btn-primary" id="openAll" type="button">↗ 一次打开 5 个平台</button>
-        </div>
-      </div>
-      <div id="directBox"></div>
-    </div>
-  </div>
-</section>
-
 <!-- ============ 好物榜单 ============ -->
 <section class="section" id="grid">
   <div class="container">
     <div class="sec-head reveal">
       <div class="kicker">TOP PICKS · 好物榜单</div>
-      <h2>校园高频好物 <span class="accent">估算价一览</span></h2>
-      <p class="sec-sub">
-        按大学生实际购买频率整理的品类,覆盖宿舍、学习、军训、考研、健身、囤粮等场景。
-        卡片上的价格是<strong>估算参考值</strong>,用来帮你判断"这东西大概什么价位、哪个平台通常更便宜";
-        真实成交价请点开卡片或用上方的全网直达查看。
-      </p>
+      <h2>大学生高频好物 <span class="accent">四平台价格一览</span></h2>
+      <p class="sec-sub">按大学生购买频率精选的品类,卡片直接展示京东 / 淘宝 / 拼多多 / 闲鱼的到手价,绿色为最低价。点击卡片查看完整比价与价格波动。</p>
     </div>
-
-    <div class="filters reveal">
-      <div class="chips" id="tabs">
-        <span class="lbl">品类</span>
-        <button class="chip active" data-cat="全部" type="button">全部</button>
-        <button class="chip" data-cat="数码3C" type="button">💻 数码3C</button>
-        <button class="chip" data-cat="宿舍生活" type="button">🛏️ 宿舍生活</button>
-        <button class="chip" data-cat="洗护美妆" type="button">🧴 洗护美妆</button>
-        <button class="chip" data-cat="文具书籍" type="button">📚 文具书籍</button>
-        <button class="chip" data-cat="运动出行" type="button">👟 运动出行</button>
-        <button class="chip" data-cat="食品零食" type="button">🍜 食品零食</button>
-        <button class="chip" data-cat="服饰鞋包" type="button">🧥 服饰鞋包</button>
-        <button class="chip" data-cat="通勤出行" type="button">🚲 通勤出行</button>
-      </div>
-      <div class="chips" id="scenes">
-        <span class="lbl">场景</span>
-        <button class="chip" data-scene="开学季" type="button">🎒 开学季</button>
-        <button class="chip" data-scene="考研自习" type="button">📖 考研自习</button>
-        <button class="chip" data-scene="军训必备" type="button">☀️ 军训必备</button>
-        <button class="chip" data-scene="宿舍改造" type="button">🛠️ 宿舍改造</button>
-        <button class="chip" data-scene="体测健身" type="button">🏃 体测健身</button>
-        <button class="chip" data-scene="囤货干粮" type="button">🍜 囤货干粮</button>
-      </div>
-      <div class="filter-row">
-        <div class="result-note" id="resultNote"></div>
-        <label style="font-size:13px;color:#5f6f86">
-          排序
-          <select class="sel" id="sortSel" aria-label="排序方式">
-            <option value="hot">按热度</option>
-            <option value="price-asc">价格从低到高</option>
-            <option value="price-desc">价格从高到低</option>
-            <option value="name">按名称</option>
-          </select>
-        </label>
-      </div>
+    <div class="tabs reveal" id="tabs">
+      <button class="tab active" data-cat="全部">全部</button>
+      <button class="tab" data-cat="数码3C">数码3C</button>
+      <button class="tab" data-cat="宿舍生活">宿舍生活</button>
+      <button class="tab" data-cat="洗护美妆">洗护美妆</button>
+      <button class="tab" data-cat="文具书籍">文具书籍</button>
+      <button class="tab" data-cat="运动出行">运动出行</button>
     </div>
-
-    <!-- 注意:id 必须与 section 的 id="grid" 区分开,
-         否则 querySelector('#grid') 会命中 section,
-         随后 grid.innerHTML 会把整个筛选栏和标题一起抹掉。 -->
-    <div class="grid" id="gridList"></div>
+    <div class="result-note" id="resultNote">📌 按大学生购买热度排序 · 价格为演示样例,下单前以平台实时价为准</div>
+    <div class="grid" id="grid"></div>
   </div>
 </section>
 
-<!-- ============ 估算比价 ============ -->
+<!-- ============ 跨平台比价 ============ -->
 <section class="section alt" id="compare">
   <div class="container">
     <div class="sec-head reveal">
-      <div class="kicker">COMPARE · 站内估算比价</div>
-      <h2>六平台 <span class="accent">估算到手价对比</span></h2>
-      <p class="sec-sub">
-        选定一件商品,看六平台的估算到手价、活动力度、学生优惠与发货时效,以及近一年的估算价格波动。
-        <strong>这些数字是按品类规律算出来的估算值,不是抓取的真实价格</strong> ——
-        看到合适的平台,点"查实时价"到该平台确认再下单。
-      </p>
+      <div class="kicker">COMPARE · 跨平台比价</div>
+      <h2>同款六平台比价 <span class="accent">叠加学生优惠</span></h2>
+      <p class="sec-sub">选择商品后自动对比六平台到手价:含大促活动、学生认证折扣与发货时效;右侧为近一年价格波动与入手建议。</p>
     </div>
-
-    <div class="cmp-bar reveal" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
-      <label for="cmpSelect" style="font-size:13.5px;color:#5f6f86;font-weight:600">选择商品:</label>
-      <select class="sel" id="cmpSelect" style="min-width:260px;max-width:340px"></select>
+    <div class="cmp-bar reveal">
+      <form class="src-search" id="cmpSearchForm" autocomplete="off">
+        <input id="cmpSearch" type="text" placeholder="🔍 搜索商品加入比价,如「保温杯」「洗面奶」…">
+        <button type="submit" class="src-go">比价</button>
+        <div class="src-suggest" id="cmpSuggest"></div>
+      </form>
+      <label for="cmpSelect">或选择商品:</label>
+      <select id="cmpSelect"></select>
     </div>
-
-    <div class="cmp-cur reveal" id="cmpCur" style="font-size:14.5px;color:#5f6f86;margin-bottom:14px"></div>
-
+    <div class="cmp-cur reveal" id="cmpCur"></div>
     <div class="cmp-wrap reveal">
-      <div class="panel">
+      <div class="panel cmp-table-panel">
         <div class="cmp-summary" id="cmpSummary"></div>
         <div class="ptable-wrap">
           <table class="src-table">
-            <thead>
-              <tr>
-                <th>平台</th><th>估算标价</th><th>优惠活动</th><th>学生优惠</th>
-                <th>估算到手</th><th>发货时效</th><th>确认实时价</th>
-              </tr>
-            </thead>
+            <thead><tr><th>平台</th><th>标价</th><th>优惠活动</th><th>学生优惠</th><th>到手价</th><th>发货时效</th><th>购买</th></tr></thead>
             <tbody id="cmpBody"></tbody>
           </table>
         </div>
-        <div class="cmp-mobile" id="cmpMobile"></div>
-        <p class="form-tip" style="margin-top:12px">
-          💡 估算到手价 = 参考价 × 平台价格水平 × 活动力度 × 学生认证折扣,由本站按品类规律推算,
-          <strong>仅供比较参考,不是任何平台的真实报价</strong>。绿色行是估算最低价。
-          闲鱼为二手参考,不计入最低价比较。
-        </p>
+        <p class="form-tip" style="margin-top:12px">💡 到手价 = 标价叠加平台活动与学生认证折扣后的估算值(演示数据);绿色行是当前新货最低价,闲鱼仅作二手参考不计入最低价。</p>
       </div>
-
-      <aside class="panel chart-panel">
-        <h3>📉 近一年估算价格走势</h3>
-        <div class="chart-sub">按品类促销规律生成的估算曲线,用于判断"现在是不是好时机"</div>
-        <div class="chart-box" id="trendChart"></div>
+      <aside class="panel cmp-chart-panel">
+        <h3>📉 近一年价格波动</h3>
+        <div class="chart-box"><canvas id="trendChart"></canvas></div>
         <div class="pi-box" id="piBox"></div>
       </aside>
     </div>
@@ -230,95 +114,39 @@
       <p class="sec-sub">大学生的钱要花在刀刃上:大促囤全年刚需,平峰期只买急用的。已自动高亮当前月份。</p>
     </div>
     <div class="cal-grid reveal" id="calGrid"></div>
-    <p class="form-tip reveal" style="margin-top:14px">
-      💡 经验法则:数码大件等 618 / 双11(全年力度最大),美妆洗护蹲 38 节 / 双11,文具日用品开学季与双12 补货即可。
-    </p>
+    <p class="form-tip reveal" style="margin-top:14px">💡 经验法则:数码大件等 618 / 双11(力度全年最大),美妆洗护蹲 38 节 / 双11,文具日用品开学季与双12 补货即可。</p>
   </div>
 </section>
 
-<!-- ============ 学生认证 ============ -->
+<!-- ============ 学生认证优惠 ============ -->
 <section class="section alt" id="student">
   <div class="container">
     <div class="sec-head reveal">
       <div class="kicker">STUDENT · 学生认证</div>
-      <h2>学生认证优惠汇总 <span class="accent">不认证 = 多花钱</span></h2>
+      <h2>学生认证优惠汇总 <span class="accent">不认证=多花钱</span></h2>
       <p class="sec-sub">一张学生身份(学信网 / 校园邮箱 / 学生证)能薅的羊毛,提前认证好,下单直接减。</p>
     </div>
     <div class="stu-grid reveal">
-      <div class="stu-card">
-        <div class="stu-icon">🐶</div><b>京东学生价</b>
-        <p>校园学生认证后享专属学生价、包邮券与 PLUS 体验;数码和日用品的力度最大,大件建议在这里下单。</p>
-      </div>
-      <div class="stu-card">
-        <div class="stu-icon">🛍️</div><b>88VIP 学生卡</b>
-        <p>淘宝 88VIP 学生认证可半价开卡,全场约 95 折并叠加跨店满减,囤日用品、纸巾、洗护最划算。</p>
-      </div>
-      <div class="stu-card">
-        <div class="stu-icon">🧧</div><b>拼多多百亿补贴</b>
-        <p>无需学生认证,直接把价格压到全网低位。数码家电下单前先来这里比一口价,常年是估算最低价平台。</p>
-      </div>
-      <div class="stu-card">
-        <div class="stu-icon">🍎</div><b>Apple 教育优惠</b>
-        <p>Mac / iPad 指定机型享教育优惠价,返校季还会额外赠送耳机;需要学信网或校园邮箱验证身份。</p>
-      </div>
-      <div class="stu-card">
-        <div class="stu-icon">💻</div><b>华为 / 小米教育优惠</b>
-        <p>笔记本、平板有学生专享立减,部分机型赠配件;在官网学生频道认证后下单即可享受。</p>
-      </div>
-      <div class="stu-card">
-        <div class="stu-icon">📺</div><b>数字服务学生半价</b>
-        <p>B站大会员、网易云音乐、百度网盘、WPS 等都有学生认证半价,追课听歌存资料都能省。</p>
-      </div>
+      <div class="stu-card"><div class="stu-icon">🍎</div><b>Apple 教育优惠</b><p>Mac / iPad 指定机型教育优惠价,返校季额外赠送耳机;需学信网或校园邮箱验证。</p></div>
+      <div class="stu-card"><div class="stu-icon">💻</div><b>华为 / 小米教育优惠</b><p>笔记本、平板学生专享立减,部分机型赠配件;官网学生频道认证后下单。</p></div>
+      <div class="stu-card"><div class="stu-icon">🐶</div><b>京东学生价</b><p>校园学生认证后享专属学生价、包邮券与PLUS体验;数码日用品力度大。</p></div>
+      <div class="stu-card"><div class="stu-icon">🛍️</div><b>88VIP 学生卡</b><p>淘宝88VIP学生认证半价开卡,全场约95折+大额券,囤日用品非常划算。</p></div>
+      <div class="stu-card"><div class="stu-icon">🧧</div><b>拼多多百亿补贴</b><p>无需学生认证,直接补贴全网低价;数码类下单前先来这比一口价。</p></div>
+      <div class="stu-card"><div class="stu-icon">📺</div><b>数字服务学生半价</b><p>B站大会员、网易云音乐、百度网盘等学生认证半价,追课听歌追剧都省钱。</p></div>
     </div>
   </div>
 </section>
-
 </main>
 
-<!-- ============ Footer ============ -->
 <footer class="footer">
   <div class="container">
     <div class="f-logo">🎓 学省 <span>CampusPrice</span></div>
-    <p>大学生购物比价与优惠助手 · 全网直达 / 估算比价 / 促销日历 / 学生认证</p>
-    <p class="f-note">
-      本站是<strong>比价导航工具</strong>:不抓取、不存储、不转载任何平台的商品与价格数据,
-      所有"直达"按钮都指向对应平台的官方搜索页。
-      站内显示的数值是按品类规律生成的<strong>估算参考</strong>,不构成报价;
-      下单前请务必以各平台实时价格与活动规则为准 ·
-      <strong>拼多多/淘宝/唯品会/得物等平台需登录账号后才能查看价格,这是平台自身的要求</strong> ·
-      理性消费,按需购买。
-    </p>
+    <p>大学生购物比价与优惠助手 · 跨平台比价 / 价格波动 / 优惠日历 / 学生认证</p>
+    <p class="f-note">本站为比价方法演示,商品与价格为模拟样例,下单前请以各平台实时价格与活动为准 · 理性消费,按需购买</p>
   </div>
 </footer>
 
-<!-- ============ 省钱清单抽屉 ============ -->
-<div class="scrim" id="scrim"></div>
-<aside class="save-panel" id="savePanel" aria-hidden="true" aria-label="省钱清单">
-  <div class="save-head">
-    <b>★ 我的省钱清单</b>
-    <button class="btn btn-sm" id="saveClose" type="button" aria-label="关闭">✕</button>
-  </div>
-  <div class="save-body" id="saveBody"></div>
-  <div class="save-foot" id="saveFoot" style="display:none">
-    <div class="save-total" id="saveTotal"></div>
-    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px" id="saveSub"></div>
-    <div class="save-actions">
-      <button class="btn" id="clearSave" type="button">清空</button>
-      <button class="btn btn-primary" id="copySave" type="button">📋 复制清单与链接</button>
-    </div>
-  </div>
-</aside>
-
-<!-- ============ 移动端底部搜索条 ============ -->
-<form class="mobile-bar" id="mobileForm" role="search">
-  <label class="sr-only" for="mobileInput">搜索商品</label>
-  <input id="mobileInput" type="text" placeholder="输入任意商品,一键比价…" autocomplete="off" enterkeyhint="search">
-  <button type="submit">比价</button>
-</form>
-
-<!-- 数据层 → 链接构造器 → 交互逻辑(顺序不能变) -->
-<script src="assets/data.js"></script>
-<script src="assets/links.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="assets/main.js"></script>
 </body>
 </html>
