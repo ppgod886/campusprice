@@ -156,7 +156,7 @@ function toast(msg){
   clearTimeout(t._tm); t._tm = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
-document.getElementById('submitBtn').addEventListener('click', ()=>{
+document.getElementById('submitBtn').addEventListener('click', async (e)=>{
   const missing = REQUIRED.filter(id=>!ans[id] || !ans[id].length);
   if (missing.length){
     const card = document.getElementById('q'+missing[0]);
@@ -166,6 +166,7 @@ document.getElementById('submitBtn').addEventListener('click', ()=>{
     setTimeout(()=>card.classList.remove('err'), 2500);
     return;
   }
+  // 组装答案文本
   let s = '【学省CampusPrice 问卷反馈】\n';
   QS.forEach(q=>{
     if (q.type === 'open'){
@@ -175,10 +176,40 @@ document.getElementById('submitBtn').addEventListener('click', ()=>{
     }
   });
   s += '—— 来自朋友圈用户调研';
-  document.getElementById('summary').textContent = s;
+
+  // 自动提交到收集端点(Netlify Forms);失败则回退为复制模式
+  const FIELD = {1:'身份',2:'网购频率',3:'比价习惯',4:'首页印象',5:'界面评价',6:'找到比价功能',7:'最有吸引力',8:'波动建议评价',9:'期望新增',10:'使用场景',11:'推荐意愿',12:'开放建议'};
+  const body = new URLSearchParams();
+  body.append('form-name', 'campusprice-survey');
+  const now = new Date();
+  body.append('提交时间', `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`);
+  QS.forEach(q=>{
+    const v = q.type==='open' ? ((ans[q.id]||'').trim() || '(未填写)') : (ans[q.id]||[]).join(' | ');
+    body.append(FIELD[q.id], v);
+  });
+
+  let autoOk = false;
+  try {
+    const r = await fetch('https://xuanpinhub.netlify.app/', {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: body.toString()
+    });
+    autoOk = r.ok;
+  } catch(e){ autoOk = false; }
+
+  const doneEl = document.getElementById('done');
+  if (autoOk){
+    doneEl.querySelector('h2').textContent = '提交成功,感谢反馈!🎉';
+    doneEl.querySelector('p').innerHTML = '你的答案已自动送达,我们会认真阅读每一条反馈!<br>也欢迎把问卷转发给更多同学~';
+    document.getElementById('summary').style.display = 'none';
+    document.getElementById('copyBtn').style.display = 'none';
+  } else {
+    document.getElementById('summary').textContent = s;
+  }
   document.getElementById('form').style.display = 'none';
   document.querySelector('.bar').style.display = 'none';
-  document.getElementById('done').style.display = 'block';
+  doneEl.style.display = 'block';
   window.scrollTo({top:0});
   document.getElementById('copyBtn').addEventListener('click', function(){
     const done = () => { this.textContent = '✓ 已复制,去粘贴发给站长吧'; toast('已复制!粘贴给站长即可'); };
