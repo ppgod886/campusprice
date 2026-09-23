@@ -6,7 +6,7 @@
 <title>学省 CampusPrice · 大学生购物比价与优惠助手</title>
 <meta name="description" content="给大学生的跨平台购物比价工具:京东/淘宝/拼多多/闲鱼/得物同款比价,学生认证优惠汇总,历史价格波动与促销日历,让每一分生活费都花在刀刃上。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
-<link rel="stylesheet" href="assets/style.css?v=1790187394">
+<link rel="stylesheet" href="assets/style.css?v=1790187961">
 </head>
 <body>
 
@@ -47,6 +47,12 @@
 </header>
 
 <main>
+<!-- JS 被禁用时的兜底说明:榜单/比价/日历均由 assets/main.js 动态生成 -->
+<noscript>
+  <div class="container" style="padding-top:24px">
+    <p class="load-fallback">本页的好物榜单、跨平台比价与优惠日历由 JavaScript 动态生成,请开启 JavaScript 后刷新页面查看。</p>
+  </div>
+</noscript>
 <!-- ============ 好物榜单 ============ -->
 <section class="section" id="grid">
   <div class="container">
@@ -159,6 +165,17 @@
 </footer>
 
 <script src="assets/chart.umd.min.js?v=1"></script>
-<script src="assets/main.js?v=1790187393"></script>
+<script src="assets/main.js?v=1790187961"></script>
+<script>
+/* 兜底:若 assets/main.js 网络加载或执行失败,首屏动态区域会保持为空,这里补一条可读提示 */
+window.addEventListener('load', function () {
+  ['productGrid', 'calGrid'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el && !el.children.length) {
+      el.innerHTML = '<p class="load-fallback">内容加载失败,请检查网络后刷新重试。</p>';
+    }
+  });
+});
+</script>
 </body>
 </html>
