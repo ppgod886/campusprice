@@ -180,7 +180,8 @@ section{scroll-margin-top:84px}
 .footer{border-top:1px solid var(--line);padding:44px 0 54px;text-align:center;background:var(--bg-alt)}
 .f-logo{font-size:19px;font-weight:800;margin-bottom:10px}
 .f-logo span{background:linear-gradient(90deg,var(--blue),var(--blue2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.f-note{color:#7c8aa0;font-size:12.5px;margin-top:8px}
+/* .footer p 的权重(0,1,1)高于 .f-note(0,1,0),故此处加一层 .footer 保证说明文字样式生效 */
+.footer .f-note{color:#7c8aa0;font-size:12.5px;margin-top:8px}
 .footer p{color:var(--muted);font-size:13.5px}
 
 /* ============ 动效 ============ */
