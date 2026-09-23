@@ -318,17 +318,29 @@ const $ = s => document.querySelector(s);
 const imgUrl = (id,w)=>`assets/img/${id}.jpg`;
 /* 图片加载失败自动重试一次(应对网络抖动),重试仍失败才降级为图标 */
 window.imgErr = function(img){
+  /* 卡片已被重新渲染(图片脱离文档)时放弃重试:避免为看不见的节点白白发请求并持有引用 */
+  if (!img || img.isConnected === false) return;
   const n = +(img.dataset.retry || 0);
   if (n < 3){
     img.dataset.retry = String(n + 1);
-    setTimeout(()=>{ img.src = img.src + (img.src.indexOf('?')>-1?'&':'?') + 'r=' + n; }, 600 + n * 900);
+    setTimeout(()=>{
+      /* 等待期间用户切换了品类/品牌,节点可能已移除,此时不再改写 src */
+      if (img.isConnected === false) return;
+      img.src = img.src + (img.src.indexOf('?')>-1?'&':'?') + 'r=' + n;
+    }, 600 + n * 900);
   } else {
     /* 卡片可能已被重新渲染(图片已脱离文档),此时 parentElement 为 null */
     if (img.parentElement) img.parentElement.classList.add('noimg');
   }
 };
-const fmt = n => '¥' + (n >= 100 ? Math.round(n) : Math.round(n*10)/10);
+/* 非有限值(0 价/负价等异常数据导致的 NaN、Infinity)统一显示为 ¥—,避免「¥NaN」进入界面 */
+const fmt = n => { const v = Number(n); return isFinite(v) ? '¥' + (v >= 100 ? Math.round(v) : Math.round(v*10)/10) : '¥—'; };
+/* 安全百分比:分子/分母任一非有限或分母为 0 时返回 null(而非 NaN/Infinity),由调用方决定降级文案 */
+const pct = (num, den) => (isFinite(num) && isFinite(den) && den !== 0) ? Math.round(num/den*100) : null;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* URL 编码兜底:用户输入若含孤立代理项(不成对的 UTF-16),encodeURIComponent 会抛 URIError,
+   这里将其替换为 U+FFFD 后再编码,保证搜索/比价链路不因奇异字符中断 */
+const safeEnc = s => { try { return encodeURIComponent(s); } catch(e){ return encodeURIComponent(String(s).replace(/[\uD800-\uDFFF]/g, '\uFFFD')); } };
 function seedOf(p){ return typeof p.id === 'number' ? p.id : (p.__seed || 1); }
 function priceFor(p, plat, idx, student){
   let v = p.base * plat.multi * (0.95 + prand(seedOf(p)*53 + idx*29)*0.1);
@@ -369,12 +381,12 @@ function renderGrid(){
     const newPs = ps.filter(x=>!x.used);
     const min = Math.min(...newPs.map(x=>x.price));
     const used = ps.find(x=>x.used);
-    const save = Math.round((1 - min/ (p.base*1.0)) * 100);
+    const savePct = pct(p.base - min, p.base);
     return `
     <article class="card" data-id="${p.id}">
       <div class="card-photo${p.img ? '' : ' noimg'}" data-emoji="${p.emoji}">
-        ${p.img ? `<img src="${imgUrl(p.img, 420)}" alt="${p.name}" loading="lazy" onerror="imgErr(this)">` : ''}
-        <span class="save-badge">到手约省 ${save}%</span>
+        ${p.img ? `<img src="${imgUrl(p.img, 420)}" alt="${p.name}" loading="lazy" onerror="window.imgErr&&window.imgErr(this)">` : ''}
+        <span class="save-badge">到手约省 ${savePct === null ? '—' : savePct + '%'}</span>
       </div>
       <h3 class="card-name">${p.brand ? p.brand + ' · ' : ''}${p.name}</h3>
       <p class="card-sell">${p.sell}</p>
@@ -406,10 +418,11 @@ $('#tabs').addEventListener('click', e=>{
 let trendChart = null;
 function loadCompare(idOrProduct){
   const p = typeof idOrProduct === 'object' ? idOrProduct : P.find(x=>x.id===idOrProduct);
+  if (!p) return; /* id 找不到对应商品(如陈旧 DOM 事件)时安全退出,避免后续 p.xxx 抛错 */
   if ([...cmpSelect.options].some(o => o.value == p.id)) cmpSelect.value = p.id;
   $('#cmpCur').innerHTML = `📦 当前比价:<b>${esc(p.emoji)} ${esc(p.name)}</b>(${esc(p.cat)}) · 标价参考 ${fmt(p.base)}`;
   // 免登录比价工具条(购物党/慢慢买/什么值得买)
-  const pk = encodeURIComponent(p.name);
+  const pk = safeEnc(p.name);
   $('#aggBar').innerHTML = '<span class="agg-t">免登录查全网:</span>' +
     `<a href="https://www.gwdang.com/search/all?keyword=${pk}" target="_blank" rel="noopener">📊 购物党·全网比价</a>` +
     `<a href="https://tool.manmanbuy.com/historyLowest.aspx?keyword=${pk}" target="_blank" rel="noopener">📉 慢慢买·历史价格</a>` +
@@ -427,12 +440,12 @@ function loadCompare(idOrProduct){
   const min = Math.min(...news.map(r=>r.finalPrice));
   const best = news.find(r=>r.finalPrice===min) || news[0];
   const usedRow = rows.find(r=>r.plat.used);
-  const vsBase = Math.round((1 - min/p.base)*100);
+  const vsBase = pct(p.base - min, p.base);
 
   $('#cmpSummary').innerHTML = `
     <div class="src-stat"><div class="m-num green">${fmt(min)}</div><div class="m-lbl">新货最低到手 · ${best.plat.name}</div></div>
     <div class="src-stat"><div class="m-num">${fmt(usedRow.finalPrice)}</div><div class="m-lbl">二手参考(闲鱼95新,不计入)</div></div>
-    <div class="src-stat"><div class="m-num orange">省 ${vsBase}%</div><div class="m-lbl">比标价参考价节省(含学生优惠)</div></div>`;
+    <div class="src-stat"><div class="m-num orange">省 ${vsBase === null ? '—' : vsBase + '%'}</div><div class="m-lbl">比标价参考价节省(含学生优惠)</div></div>`;
 
   $('#cmpBody').innerHTML = rows.map(r=>{
     const isBest = !r.plat.used && r.finalPrice===min;
@@ -441,7 +454,7 @@ function loadCompare(idOrProduct){
       ? `<span class="stu-tag">${p.stu && !r.plat.used && p.stu<0.93 ? '教育优惠 '+(p.stu*10).toFixed(1).replace('.0','')+'折' : r.plat.stuLabel}</span>`
       : (r.plat.stuLabel ? `<span style="color:#94a3b8;font-size:12px">无</span>` : '');
     // 各平台商品搜索直达链接(带商品关键词)
-    const kw = encodeURIComponent((p.brand ? p.brand + ' ' : '') + p.name);
+    const kw = safeEnc((p.brand ? p.brand + ' ' : '') + p.name);
     const href = {
       jd:'https://search.jd.com/Search?keyword=', tb:'https://s.taobao.com/search?q=',
       pdd:'https://mobile.yangkeduo.com/search_result.html?search_key=', vip:'https://search.vip.com/search.php?keyword=',
@@ -473,43 +486,64 @@ function renderTrend(p){
   const {vals, current, curIdx} = trendSeries(p);
   const min = Math.min(...vals), max = Math.max(...vals);
   const minIdx = vals.indexOf(min);
-  const gapPct = Math.round((current-min)/min*100);
+  const gapPct = pct(current - min, min);
   let advice, color;
-  if (gapPct <= 3){ advice = '✅ 当前价接近全年最低,可以放心入手'; color = '#059669'; }
+  if (gapPct === null){ advice = '⚠️ 价格数据异常,暂无法给出入手建议'; color = '#64748b'; }
+  else if (gapPct <= 3){ advice = '✅ 当前价接近全年最低,可以放心入手'; color = '#059669'; }
   else if (gapPct <= 8){ advice = '👍 当前价处于较低位,刚需可直接买'; color = '#0ea5e9'; }
   else if (gapPct <= 15){ advice = `⏳ 当前比全年最低价高 ${gapPct}%,不急可蹲 618 / 双11`; color = '#d97706'; }
   else { advice = `🛑 当前比全年最低价高 ${gapPct}%,建议加购物车等大促`; color = '#dc2626'; }
+  const rangePct = pct(max - min, min);
 
   $('#piBox').innerHTML = `
     <div class="pi-line"><span>当前价(${MONTHS[curIdx]})</span><b>${fmt(current)}</b></div>
     <div class="pi-line"><span>全年最低(${MONTHS[minIdx]})</span><b style="color:#047857">${fmt(min)}</b></div>
     <div class="pi-line"><span>全年最高(${MONTHS[vals.indexOf(max)]})</span><b style="color:#dc2626">${fmt(max)}</b></div>
-    <div class="pi-line"><span>价格波动幅度</span><b>${Math.round((max-min)/min*100)}%</b></div>
+    <div class="pi-line"><span>价格波动幅度</span><b>${rangePct === null ? '—' : rangePct + '%'}</b></div>
     <div class="pi-advice" style="background:${color}14;color:${color}">${advice}</div>`;
 
-  if (!window.Chart) return;
   const ctx = document.getElementById('trendChart');
-  if (trendChart){ trendChart.destroy(); }
+  /* Chart.js 未加载 / canvas 缺失时降级为文字提示,比价表、榜单、日历等其它功能不受影响 */
+  if (!window.Chart || !ctx){
+    const box = document.querySelector('.chart-box');
+    if (box){
+      box.classList.add('nochart');
+      if (!box.querySelector('.chart-fallback')){
+        const tip = document.createElement('p');
+        tip.className = 'chart-fallback';
+        tip.textContent = '图表组件未加载,价格区间已在上方文字中列出,比价功能不受影响';
+        box.appendChild(tip);
+      }
+    }
+    return;
+  }
+  if (trendChart){ trendChart.destroy(); trendChart = null; }
   const grad = ctx.getContext('2d').createLinearGradient(0,0,0,260);
   grad.addColorStop(0,'rgba(37,99,235,.22)');
   grad.addColorStop(1,'rgba(37,99,235,0)');
   const radii = vals.map((v,i)=> i===minIdx ? 6 : (i===curIdx ? 6 : 3));
   const colors = vals.map((v,i)=> i===minIdx ? '#059669' : '#2563eb');
-  trendChart = new Chart(ctx, {
-    type:'line',
-    data:{ labels:MONTHS, datasets:[{
-      label:p.name, data:vals, borderColor:'#2563eb', backgroundColor:grad,
-      fill:true, tension:.35, borderWidth:2.5, pointRadius:radii, pointBackgroundColor:colors
-    }]},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:c=>` ${MONTHS[c.dataIndex]}:${fmt(c.parsed.y)}${c.dataIndex===minIdx?' (全年最低)':''}`}}
-      },
-      scales:{ y:{ticks:{callback:v=>'¥'+v}} }
-    }
-  });
+  try {
+    trendChart = new Chart(ctx, {
+      type:'line',
+      data:{ labels:MONTHS, datasets:[{
+        label:p.name, data:vals, borderColor:'#2563eb', backgroundColor:grad,
+        fill:true, tension:.35, borderWidth:2.5, pointRadius:radii, pointBackgroundColor:colors
+      }]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:c=>` ${MONTHS[c.dataIndex]}:${fmt(c.parsed.y)}${c.dataIndex===minIdx?' (全年最低)':''}`}}
+        },
+        scales:{ y:{ticks:{callback:v=>'¥'+v}} }
+      }
+    });
+  } catch(err){
+    /* 图表组件自身异常不应向外冒泡,更不能中断首屏初始化(榜单/日历) */
+    trendChart = null;
+    if (window.console && console.warn) console.warn('[CampusPrice] 价格趋势图渲染失败:', err);
+  }
 }
 
 const cmpSelect = $('#cmpSelect');
@@ -650,11 +684,12 @@ $('#burger').addEventListener('click', ()=> $('#navMenu').classList.toggle('open
 document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click', ()=> $('#navMenu').classList.remove('open')));
 
 /* ---------- 图表默认 & 初始化 ---------- */
-if (window.Chart){
+if (window.Chart && Chart.defaults && Chart.defaults.font){
   Chart.defaults.color = '#5f6f86';
   Chart.defaults.font.family = '"Noto Sans SC","Microsoft YaHei",sans-serif';
   Chart.defaults.borderColor = 'rgba(15,23,42,.08)';
 }
-loadCompare(P[0]);
+/* 先渲染首屏榜单与日历,再做比价/图表:即便比价或图表组件异常,核心内容也已就位 */
 renderGrid();
 renderCalendar();
+loadCompare(P[0]);
