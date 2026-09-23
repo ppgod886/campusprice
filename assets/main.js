@@ -396,18 +396,19 @@ function renderGrid(){
       const min = Math.min(...newPs.map(x=>x.price));
       const used = ps.find(x=>x.used);
       const savePct = pct(p.base - min, p.base);
+      const title = (p.brand ? p.brand + ' · ' : '') + p.name;
       return `
       <article class="card" data-id="${p.id}">
         <div class="card-photo${p.img ? '' : ' noimg'}" data-emoji="${p.emoji}">
-          ${p.img ? `<img src="${imgUrl(p.img, 420)}" alt="${p.name}" loading="lazy" decoding="async" onerror="window.imgErr&&window.imgErr(this)">` : ''}
+          ${p.img ? `<img src="${imgUrl(p.img, 420)}" alt="${esc(title)}" loading="lazy" decoding="async" onerror="window.imgErr&&window.imgErr(this)">` : ''}
           <span class="save-badge">到手约省 ${savePct === null ? '—' : savePct + '%'}</span>
         </div>
-        <h3 class="card-name">${p.brand ? p.brand + ' · ' : ''}${p.name}</h3>
+        <h3 class="card-name">${esc(title)}</h3>
         <p class="card-sell">${p.sell}</p>
         <div class="card-p4">
           ${ps.map(x=>`<div class="p4 ${!x.used && x.price===min ? 'best':''}"><div class="pn">${x.name}</div><div class="pv">${fmt(x.price)}</div></div>`).join('')}
         </div>
-        <button class="card-btn">查看完整比价与波动 →</button>
+        <button class="card-btn" type="button">查看完整比价与波动<span class="sr-only">:${esc(title)}</span> →</button>
       </article>`;
     }).join('');
   }
@@ -415,12 +416,21 @@ function renderGrid(){
     ? `🔍 搜索“${curTerm}”找到 ${list.length} 件好物 · 价格为演示样例`
     : `📌 ${curCat}${curBrand!=='全部品牌' ? ' · ' + curBrand : ''}共 ${list.length} 件好物 · 绿色为四平台最低到手价`;
 }
+/* 品类筛选按钮:同步视觉选中态(.active)与无障碍状态(aria-pressed),
+   否则读屏无法知道 10 个筛选按钮里当前生效的是哪一个 */
+function setActiveTab(cat){
+  document.querySelectorAll('#tabs .tab').forEach(t=>{
+    const on = t.dataset.cat === cat;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
 /* 空状态复位:品类 / 品牌 / 关键词三处筛选一起清空,与点「全部」tab 的行为保持一致 */
 function resetFilters(){
   curCat = '全部'; curTerm = ''; curBrand = '全部品牌';
   brandSel.value = '全部品牌';
   $('#searchInput').value = '';
-  document.querySelectorAll('#tabs .tab').forEach(t=>t.classList.toggle('active', t.dataset.cat === '全部'));
+  setActiveTab('全部');
   renderGrid();
 }
 grid.addEventListener('click', e=>{
@@ -431,8 +441,7 @@ grid.addEventListener('click', e=>{
 });
 $('#tabs').addEventListener('click', e=>{
   const btn = e.target.closest('.tab'); if(!btn) return;
-  document.querySelectorAll('#tabs .tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
+  setActiveTab(btn.dataset.cat);
   curCat = btn.dataset.cat; curTerm=''; $('#searchInput').value='';
   curBrand = '全部品牌'; brandSel.value = '全部品牌';
   renderGrid();
@@ -476,7 +485,7 @@ function loadCompare(idOrProduct){
     const promos = r.plat.promos.map(t=>`<span class="${PROMO_TAG_CLS}">${t}</span>`).join('');
     const stu = r.stuOn
       ? `<span class="stu-tag">${p.stu && !r.plat.used && p.stu<0.93 ? '教育优惠 '+(p.stu*10).toFixed(1).replace('.0','')+'折' : r.plat.stuLabel}</span>`
-      : (r.plat.stuLabel ? `<span style="color:#94a3b8;font-size:12px">无</span>` : '');
+      : (r.plat.stuLabel ? `<span style="color:#64748b;font-size:12px">无</span>` : '');
     // 各平台商品搜索直达链接(带商品关键词)
     const kw = safeEnc((p.brand ? p.brand + ' ' : '') + p.name);
     const href = {
@@ -492,7 +501,7 @@ function loadCompare(idOrProduct){
       <td>${stu}</td>
       <td><b style="${isBest?'color:#047857':''}">${fmt(r.finalPrice)}</b>${isBest?'<span class="price-badge">最低到手</span>':''}${r.plat.used?'<span class="strike" style="margin-left:6px">二手参考</span>':''}</td>
       <td>${r.plat.ship}</td>
-      <td><a class="buy-link" href="${href}" target="_blank" rel="noopener">去购买 ↗</a></td>
+      <td><a class="buy-link" href="${href}" target="_blank" rel="noopener">去购买<span class="sr-only">:${esc(r.plat.name)} ${esc(p.name)}(新窗口打开)</span> ↗</a></td>
     </tr>`;
   }).join('');
 
@@ -511,12 +520,14 @@ function renderTrend(p){
   const min = Math.min(...vals), max = Math.max(...vals);
   const minIdx = vals.indexOf(min);
   const gapPct = pct(current - min, min);
+  /* 建议条文字与 8% 同色底色叠加,原 #059669/#0ea5e9/#d97706/#dc2626 实测对比度仅 2.6~4.3,
+     均低于 AA 的 4.5:1;这里换成同色系更深一档的色值(实测 4.9~6.7) */
   let advice, color;
-  if (gapPct === null){ advice = '⚠️ 价格数据异常,暂无法给出入手建议'; color = '#64748b'; }
-  else if (gapPct <= 3){ advice = '✅ 当前价接近全年最低,可以放心入手'; color = '#059669'; }
-  else if (gapPct <= 8){ advice = '👍 当前价处于较低位,刚需可直接买'; color = '#0ea5e9'; }
-  else if (gapPct <= 15){ advice = `⏳ 当前比全年最低价高 ${gapPct}%,不急可蹲 618 / 双11`; color = '#d97706'; }
-  else { advice = `🛑 当前比全年最低价高 ${gapPct}%,建议加购物车等大促`; color = '#dc2626'; }
+  if (gapPct === null){ advice = '⚠️ 价格数据异常,暂无法给出入手建议'; color = '#475569'; }
+  else if (gapPct <= 3){ advice = '✅ 当前价接近全年最低,可以放心入手'; color = '#047857'; }
+  else if (gapPct <= 8){ advice = '👍 当前价处于较低位,刚需可直接买'; color = '#0369a1'; }
+  else if (gapPct <= 15){ advice = `⏳ 当前比全年最低价高 ${gapPct}%,不急可蹲 618 / 双11`; color = '#a34a08'; }
+  else { advice = `🛑 当前比全年最低价高 ${gapPct}%,建议加购物车等大促`; color = '#b91c1c'; }
   const rangePct = pct(max - min, min);
 
   $('#piBox').innerHTML = `
@@ -600,6 +611,9 @@ cmpSuggest.addEventListener('click', e=>{
     cmpSelect.value = p.id; cmpSearch.value = p.name;
     loadCompare(p);
   }
+  /* 先聚焦再收起:否则被点中的联想按钮随下拉一起隐藏,焦点会掉回 body,
+     键盘用户下一次 Tab 会从页首重新开始;先 focus 会触发 focus 监听重开下拉,故顺序不能反 */
+  cmpSearch.focus();
   cmpSuggest.classList.remove('show');
 });
 cmpSearchForm.addEventListener('submit', e=>{
@@ -661,6 +675,9 @@ function showToast2(msg){
   if (!t){
     t = document.createElement('div');
     t.id = 'toast2';
+    /* role=status + aria-live:轻提示是纯视觉的 2.6s 气泡,读屏用户原本完全收不到这条反馈 */
+    t.setAttribute('role', 'status');
+    t.setAttribute('aria-live', 'polite');
     /* width:max-content + max-width:否则 position:fixed 元素按 left:50% 之外的剩余空间收缩,
        长文案(如「已生成「…」的估算比价」)在手机上会被压成半屏宽的细长条 */
     t.style.cssText = 'position:fixed;left:50%;bottom:calc(44px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);text-align:center;line-height:1.5;background:#fff;border:1px solid rgba(37,99,235,.5);color:#1d4ed8;padding:11px 24px;border-radius:22px;font-size:14px;z-index:300;box-shadow:0 12px 36px rgba(15,23,42,.18);pointer-events:none;transition:opacity .3s';
@@ -678,7 +695,7 @@ $('#searchForm').addEventListener('submit', e=>{
   const term = $('#searchInput').value.trim();
   if (!term) { document.getElementById('grid').scrollIntoView({behavior:'smooth'}); return; }
   const match = P.find(p=>p.name.includes(term)||term.includes(p.name)||p.sell.includes(term)||p.cat.includes(term));
-  if (match){ curCat='全部'; curTerm=term; document.querySelectorAll('#tabs .tab').forEach(t=>t.classList.toggle('active',t.dataset.cat==='全部')); renderGrid(); loadCompare(match); }
+  if (match){ curCat='全部'; curTerm=term; setActiveTab('全部'); renderGrid(); loadCompare(match); }
   else {
     const g = guessCat(term);
     loadCompare({id:'custom', name:term, cat:g.cat, emoji:'🔎', base:g.base, __seed:strSeed(term)});
@@ -710,14 +727,24 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 const nav = $('#nav');
 addEventListener('scroll', ()=> nav.classList.toggle('scrolled', scrollY>30), {passive:true});
 
-/* 移动端菜单:同步 aria-expanded,展开时锁定背景滚动(关闭时必须解锁,否则页面会永久不能滚动) */
+/* 移动端菜单:同步 aria-expanded / aria-label,展开时锁定背景滚动(关闭时必须解锁,否则页面会永久不能滚动) */
 const navMenu = $('#navMenu'), burger = $('#burger');
 function setMenu(open){
   navMenu.classList.toggle('open', open);
   document.body.classList.toggle('menu-open', open);
   burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  /* 展开后按钮的作用已变成「关闭」,名称必须跟着变,否则读屏听到的是相反的操作 */
+  burger.setAttribute('aria-label', open ? '关闭导航菜单' : '打开导航菜单');
 }
-burger.addEventListener('click', ()=> setMenu(!navMenu.classList.contains('open')));
+burger.addEventListener('click', ()=>{
+  const open = !navMenu.classList.contains('open');
+  setMenu(open);
+  /* 展开后把焦点送进浮层,键盘用户不必再从头 Tab 一遍 */
+  if (open){
+    const first = navMenu.querySelector('a');
+    if (first) first.focus();
+  }
+});
 document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click', ()=> setMenu(false)));
 /* 点菜单外的空白处 / 按 Esc 也要能关掉,而不是只能靠再点一次汉堡 */
 document.addEventListener('click', e=>{
@@ -725,7 +752,19 @@ document.addEventListener('click', e=>{
   if (e.target.closest('#navMenu') || e.target.closest('#burger')) return;
   setMenu(false);
 });
-addEventListener('keydown', e=>{ if (e.key === 'Escape') setMenu(false); });
+addEventListener('keydown', e=>{
+  if (e.key !== 'Escape') return;
+  /* Esc 优先关闭比价联想下拉(它同样是浮层,原实现只能用鼠标点空白处关掉) */
+  if (cmpSuggest.classList.contains('show')){
+    cmpSuggest.classList.remove('show');
+    cmpSearch.focus();
+    return;
+  }
+  const wasOpen = navMenu.classList.contains('open');
+  setMenu(false);
+  /* 焦点送回触发它的汉堡按钮,避免键盘用户「焦点掉到 body」后从页首重新 Tab */
+  if (wasOpen) burger.focus();
+});
 /* 旋屏或拉宽窗口回到桌面断点后菜单已不可见,此处兜底解锁,避免滚动锁定残留 */
 addEventListener('resize', ()=>{ if (innerWidth > 960) setMenu(false); }, {passive:true});
 
