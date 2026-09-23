@@ -26,6 +26,18 @@ a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer}
 /* 触屏:去掉点击时的灰色高亮块,并去掉 300ms 点击延迟 */
 a,button,select,input,label{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+/* 读屏专用隐藏文本:212 个「查看完整比价与波动」、6 个「去购买 ↗」原本名称完全相同,
+   靠它补上「哪件商品 / 哪个平台」才可区分 */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+/* 键盘焦点可见:只在键盘操作时描边,鼠标 / 触屏下的外观不变 */
+a:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+/* Hero 搜索框原本只有 outline:none、没有任何替代焦点样式(WCAG 2.4.7),这里给胶囊加同款蓝色光环 */
+.search:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.14)}
+/* 跳转链接的落点(整块 main)由程序聚焦,不需要描边 */
+main:focus{outline:none}
+/* 「跳到主要内容」:默认藏在视口上方,键盘 Tab 到时才出现在顶部 */
+.skip-link{position:fixed;left:50%;top:8px;transform:translate(-50%,-200%);z-index:200;padding:10px 18px;border-radius:999px;background:#fff;border:1px solid rgba(37,99,235,.45);color:#1d4ed8;font-size:14px;font-weight:700;box-shadow:var(--shadow);transition:transform .2s}
+.skip-link:focus{transform:translate(-50%,0)}
 /* 移动端菜单展开时锁定背景滚动(避免在浮层下方误滚页面) */
 body.menu-open{overflow:hidden}
 section{scroll-margin-top:84px}
@@ -57,7 +69,7 @@ section{scroll-margin-top:84px}
 .hero-sub{max-width:660px;margin:18px auto 0;color:#3d4c63;font-size:16.5px}
 .search{display:flex;max-width:640px;margin:30px auto 0;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px;box-shadow:var(--shadow)}
 .search input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:15px;padding:10px 20px;font-family:inherit;min-width:0}
-.search input::placeholder{color:#93a3b8}
+.search input::placeholder{color:#64748b}
 .search button{border:none;border-radius:999px;padding:11px 26px;background:linear-gradient(90deg,#2563eb,#0ea5e9);color:#fff;font-weight:800;font-size:15px;white-space:nowrap}
 .search button:hover{filter:brightness(1.08)}
 .hero-note{margin-top:14px;color:#5f6f86;font-size:13px}
@@ -84,7 +96,7 @@ section{scroll-margin-top:84px}
 .brand-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-4px 0 14px;font-size:13px;color:var(--muted)}
 .brand-bar select{padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--text);font-size:13px;font-family:inherit;outline:none;cursor:pointer}
 .brand-bar select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.brand-tip{font-size:12px;color:#93a3b8}
+.brand-tip{font-size:12px;color:var(--muted)}
 
 /* ============ 商品卡片 ============ */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:16px}
@@ -96,7 +108,7 @@ section{scroll-margin-top:84px}
 .card-photo::after{content:attr(data-emoji);position:absolute;inset:0;display:none;place-items:center;font-size:52px;background:linear-gradient(135deg,rgba(37,99,235,.14),rgba(14,165,233,.12))}
 .card-photo.noimg img{display:none}
 .card-photo.noimg::after{display:grid}
-.card-photo .save-badge{position:absolute;top:10px;right:10px;background:#ea580c;color:#fff;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;box-shadow:0 2px 10px rgba(15,23,42,.25)}
+.card-photo .save-badge{position:absolute;top:10px;right:10px;background:#c2410c;color:#fff;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;box-shadow:0 2px 10px rgba(15,23,42,.25)}
 .card-name{font-size:16px;font-weight:800}
 .card-sell{color:var(--muted);font-size:12.5px;margin-top:4px;min-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-p4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0 4px}
@@ -137,7 +149,7 @@ section{scroll-margin-top:84px}
 .src-stat{background:#f6f8fb;border:1px solid var(--line);border-radius:12px;padding:12px 16px}
 .src-stat .m-num{color:#1d4ed8}
 .src-stat .m-num.green{color:#047857}
-.src-stat .m-num.orange{color:#ea580c}
+.src-stat .m-num.orange{color:#c2410c}
 .src-stat .m-lbl{font-size:11.5px;color:var(--muted);margin-top:2px}
 .src-table{width:100%;border-collapse:collapse;font-size:13.5px}
 .src-table th{text-align:left;color:var(--muted);font-weight:600;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -148,7 +160,7 @@ section{scroll-margin-top:84px}
 .promo-tag{display:inline-block;padding:2px 9px;border-radius:999px;background:rgba(234,88,12,.09);border:1px solid rgba(234,88,12,.28);color:#c2410c;font-size:11.5px;margin:1px 3px 1px 0}
 .stu-tag{display:inline-block;padding:2px 9px;border-radius:999px;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.28);color:#1d4ed8;font-size:11.5px;margin:1px 0}
 .price-badge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#047857;color:#fff;font-size:11px;font-weight:700;vertical-align:1px}
-.strike{color:#94a3b8;text-decoration:line-through;font-weight:600;font-size:12px}
+.strike{color:#64748b;text-decoration:line-through;font-weight:600;font-size:12px}
 .buy-link{padding:6px 14px;border-radius:8px;border:1px solid rgba(37,99,235,.4);background:rgba(37,99,235,.07);color:#1d4ed8;font-size:12.5px;font-weight:700;white-space:nowrap;cursor:pointer;transition:.2s;display:inline-block}
 .buy-link:hover{background:rgba(37,99,235,.16)}
 /* 7 列比价表在窄屏必然横向滚动:仅小屏提示可滑动,避免用户以为右侧几列不存在 */
@@ -186,9 +198,9 @@ section{scroll-margin-top:84px}
 .cal-card.hot{border-color:rgba(234,88,12,.5);background:linear-gradient(135deg,rgba(234,88,12,.06),rgba(249,115,22,.05))}
 .cal-badge{float:right;font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px}
 .cal-badge.nowb{background:#2563eb;color:#fff}
-.cal-badge.highb{background:rgba(234,88,12,.12);color:#c2410c}
+.cal-badge.highb{background:rgba(234,88,12,.09);color:#c2410c}
 .cal-badge.midb{background:rgba(37,99,235,.1);color:#1d4ed8}
-.cal-badge.lowb{background:rgba(15,23,42,.06);color:#64748b}
+.cal-badge.lowb{background:rgba(15,23,42,.06);color:var(--muted)}
 
 /* ============ 学生优惠 ============ */
 .stu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
@@ -202,8 +214,9 @@ section{scroll-margin-top:84px}
 .footer{border-top:1px solid var(--line);padding:44px 0 54px;text-align:center;background:var(--bg-alt)}
 .f-logo{font-size:19px;font-weight:800;margin-bottom:10px}
 .f-logo span{background:linear-gradient(90deg,var(--blue),var(--blue2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-/* .footer p 的权重(0,1,1)高于 .f-note(0,1,0),故此处加一层 .footer 保证说明文字样式生效 */
-.footer .f-note{color:#7c8aa0;font-size:12.5px;margin-top:8px}
+/* .footer p 的权重(0,1,1)高于 .f-note(0,1,0),故此处加一层 .footer 保证说明文字样式生效
+   (#7c8aa0 在 #eef3f9 上实测仅 3.14:1,低于 AA 的 4.5:1,改用 --muted,实测 4.59:1) */
+.footer .f-note{color:var(--muted);font-size:12.5px;margin-top:8px}
 .footer p{color:var(--muted);font-size:13.5px}
 
 /* ============ 动效 ============ */
@@ -217,8 +230,10 @@ section{scroll-margin-top:84px}
   .stu-grid{grid-template-columns:repeat(2,1fr)}
   .burger{display:grid}
   /* max-height 两行:第二行按视口高度收缩,横屏/小屏不会把菜单撑出屏幕外 */
-  .nav-links{position:fixed;top:64px;right:0;left:0;background:rgba(255,255,255,.98);flex-direction:column;padding:22px;gap:18px;border-bottom:1px solid var(--line);transform:translateY(-130%);transition:.3s;z-index:-1;box-shadow:0 16px 40px rgba(15,23,42,.1);max-height:calc(100vh - 64px);max-height:calc(100dvh - 64px);overflow-y:auto;overscroll-behavior:contain}
-  .nav-links.open{transform:none}
+  /* visibility:hidden 让收起的菜单同时退出可访问树与 Tab 顺序:
+     否则它只是被 translateY 移到屏幕外,键盘仍会一格一格停在看不见的菜单项上 */
+  .nav-links{position:fixed;top:64px;right:0;left:0;background:rgba(255,255,255,.98);flex-direction:column;padding:22px;gap:18px;border-bottom:1px solid var(--line);transform:translateY(-130%);transition:.3s;z-index:-1;box-shadow:0 16px 40px rgba(15,23,42,.1);visibility:hidden;max-height:calc(100vh - 64px);max-height:calc(100dvh - 64px);overflow-y:auto;overscroll-behavior:contain}
+  .nav-links.open{transform:none;visibility:visible}
   /* 菜单项整行可点,高度 ≥44px(原来只有文字本身可点,手指容易点空) */
   .nav-links a{display:block;width:100%;padding:11px 12px;text-align:center}
   .nav-links a:active{background:rgba(37,99,235,.07)}
