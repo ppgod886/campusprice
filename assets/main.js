@@ -71,8 +71,8 @@ const IMG = {
 };
 const IMG2 = {
   pants:'1594633312681-425c7b97ccd1', sweat:'1620799140408-edc6dcb6d633', jkt:'1591047139829-d91aecb6caea',
-  brown:'1549298916-b41d501d3772', dark:'1491553895911-0055eca6402d', totes:'1522338242992-e1a54906a8da',
-  kraft:'1544816155-12df9643f363', pancake:'1567620905732-2d1ec7ab7445', salad:'1546069901-ba9599a7e63c',
+  dark:'1491553895911-0055eca6402d', totes:'1522338242992-e1a54906a8da',
+  pancake:'1567620905732-2d1ec7ab7445', salad:'1546069901-ba9599a7e63c',
   phone:'1511707171634-5f897ff02aa9', serum:'1556228578-8c89e6adf883', pen2:'1471107340929-a87cd0f5b5f3',
   gym:'1517836357463-d25dfeac3438', workout:'1571019613454-1cb2f99b2d8b', lamp:'1507473885765-e6ed057f782c',
   mouse:'1527864550417-7fd91fc51a46', speaker:'1543512214-318c7553f230', bank:'1609091839311-d5365f9ff1c5',
@@ -199,7 +199,7 @@ const EXTRA2 = [
   ['生活日用','3M 思高','百洁布 4 片',19.9,'clean'],['生活日用','美丽雅','马桶刷',19.9,'clean'],
   ['生活日用','妙洁','保鲜袋 3 卷',13.9,'clean'],['生活日用','洁云','厨房纸 2 卷',16.9,'clean'],
   ['生活日用','名创优品','无火香薰',25,'candle'],['生活日用','名创优品','湿巾 80 抽',10,'clean'],
-  ['生活日用','悠家良品',' ins 马克杯',29.9,'mug'],['生活日用','苏泊尔','保温饭盒',59.9,'bowl'],
+  ['生活日用','悠家良品','ins 马克杯',29.9,'mug'],['生活日用','苏泊尔','保温饭盒',59.9,'bowl'],
   ['生活日用','得力','防风衣架 20 只',16.9,'storage'],['生活日用','乐扣乐扣','玻璃保鲜盒',39.9,'prep'],
   ['食品饮料','良品铺子','零食大礼包',69.9,'candy'],['食品饮料','百草味','猪肉脯 200g',26.9,'ribs'],
   ['食品饮料','农夫山泉','饮用水 24 瓶',33.9,'water'],['食品饮料','康师傅','红烧牛肉面 12 连包',39.9,'pancake2'],
@@ -307,8 +307,9 @@ const MONTHS = ['10月','11月','12月','1月','2月','3月','4月','5月','6月
 const SEASON = [1.02,0.88,0.99,0.99,1.01,0.97,1.00,1.02,0.90,1.03,1.04,0.96]; /* 11月双11、6月618、9月开学季偏低 */
 function prand(seed){ const x = Math.sin(seed * 12.9898) * 43758.5453; return x - Math.floor(x); }
 function trendSeries(p){
-  const vals = MONTHS.map((m,i)=> Math.round(p.base * SEASON[i] * (0.97 + prand(p.id*37 + i*13)*0.06)));
-  return { vals, current: vals[11] };
+  const vals = MONTHS.map((m,i)=> Math.round(p.base * SEASON[i] * (0.97 + prand(seedOf(p)*37 + i*13)*0.06)));
+  const curIdx = Math.max(0, MONTHS.indexOf((new Date().getMonth()+1) + '月'));
+  return { vals, current: vals[curIdx], curIdx };
 }
 
 /* ---------- 工具 ---------- */
@@ -326,8 +327,10 @@ window.imgErr = function(img){
   }
 };
 const fmt = n => '¥' + (n >= 100 ? Math.round(n) : Math.round(n*10)/10);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function seedOf(p){ return typeof p.id === 'number' ? p.id : (p.__seed || 1); }
 function priceFor(p, plat, idx, student){
-  let v = p.base * plat.multi * (0.95 + prand(p.id*53 + idx*29)*0.1);
+  let v = p.base * plat.multi * (0.95 + prand(seedOf(p)*53 + idx*29)*0.1);
   if (student && (plat.student || p.stu)) v *= (p.stu || plat.student);
   return v >= 100 ? Math.round(v) : Math.round(v*10)/10;
 }
@@ -402,8 +405,8 @@ $('#tabs').addEventListener('click', e=>{
 let trendChart = null;
 function loadCompare(idOrProduct){
   const p = typeof idOrProduct === 'object' ? idOrProduct : P.find(x=>x.id===idOrProduct);
-  $('#cmpSelect').value = p.id;
-  $('#cmpCur').innerHTML = `📦 当前比价:<b>${p.emoji} ${p.name}</b>(${p.cat}) · 标价参考 ${fmt(p.base)}`;
+  if ([...cmpSelect.options].some(o => o.value == p.id)) cmpSelect.value = p.id;
+  $('#cmpCur').innerHTML = `📦 当前比价:<b>${esc(p.emoji)} ${esc(p.name)}</b>(${esc(p.cat)}) · 标价参考 ${fmt(p.base)}`;
   // 免登录比价工具条(购物党/慢慢买/什么值得买)
   const pk = encodeURIComponent(p.name);
   $('#aggBar').innerHTML = '<span class="agg-t">免登录查全网:</span>' +
@@ -414,13 +417,13 @@ function loadCompare(idOrProduct){
   /* 六平台行 */
   const rows = PLATS.map((plat,idx)=>{
     const listPrice = priceFor(p, plat, 0, false);
-    const stuOn = !!(plat.student || (p.stu && !plat.used));
+    const stuOn = !!plat.student;
     const finalPrice = stuOn ? priceFor(p, plat, 0, true) : priceFor(p, plat, 0, false);
     return {plat, idx, listPrice, stuOn, finalPrice};
   });
   const news = rows.filter(r=>!r.plat.used);
   const min = Math.min(...news.map(r=>r.finalPrice));
-  const best = news.find(r=>r.finalPrice===min);
+  const best = news.find(r=>r.finalPrice===min) || news[0];
   const usedRow = rows.find(r=>r.plat.used);
   const vsBase = Math.round((1 - min/p.base)*100);
 
@@ -433,7 +436,7 @@ function loadCompare(idOrProduct){
     const isBest = !r.plat.used && r.finalPrice===min;
     const promos = r.plat.promos.map(t=>`<span class="${PROMO_TAG_CLS}">${t}</span>`).join('');
     const stu = r.stuOn
-      ? `<span class="stu-tag">${p.stu && !r.plat.used && p.stu<0.93 ? '教育优惠 '+Math.round((1-p.stu)*100)+'折' : r.plat.stuLabel}</span>`
+      ? `<span class="stu-tag">${p.stu && !r.plat.used && p.stu<0.93 ? '教育优惠 '+(p.stu*10).toFixed(1).replace('.0','')+'折' : r.plat.stuLabel}</span>`
       : (r.plat.stuLabel ? `<span style="color:#94a3b8;font-size:12px">无</span>` : '');
     // 各平台商品搜索直达链接(带商品关键词)
     const kw = encodeURIComponent((p.brand ? p.brand + ' ' : '') + p.name);
@@ -476,7 +479,7 @@ function renderTrend(p){
   else { advice = `🛑 当前比全年最低价高 ${gapPct}%,建议加购物车等大促`; color = '#dc2626'; }
 
   $('#piBox').innerHTML = `
-    <div class="pi-line"><span>当前价(9月)</span><b>${fmt(current)}</b></div>
+    <div class="pi-line"><span>当前价(${MONTHS[curIdx]})</span><b>${fmt(current)}</b></div>
     <div class="pi-line"><span>全年最低(${MONTHS[minIdx]})</span><b style="color:#047857">${fmt(min)}</b></div>
     <div class="pi-line"><span>全年最高(${MONTHS[vals.indexOf(max)]})</span><b style="color:#dc2626">${fmt(max)}</b></div>
     <div class="pi-line"><span>价格波动幅度</span><b>${Math.round((max-min)/min*100)}%</b></div>
@@ -517,7 +520,7 @@ function showSuggest(term){
   if (!term){ cmpSuggest.classList.remove('show'); return; }
   const list = P.filter(p=>p.name.includes(term)||p.cat.includes(term)||p.sell.includes(term)).slice(0,8);
   cmpSuggest.innerHTML = list.map(p=>`<button type="button" data-id="${p.id}"><span>${p.emoji} ${p.name}</span><span class="sg-cat">${p.cat}</span></button>`).join('')
-    + `<button type="button" data-custom="1"><span class="sg-new">🔎 对「${term}」按类目估算比价</span><span class="sg-cat">估算数据</span></button>`;
+    + `<button type="button" data-custom="1"><span class="sg-new">🔎 对「${esc(term)}」按类目估算比价</span><span class="sg-cat">估算数据</span></button>`;
   cmpSuggest.classList.add('show');
 }
 cmpSearch.addEventListener('input', ()=> showSuggest(cmpSearch.value.trim()));
@@ -595,7 +598,7 @@ function showToast2(msg){
   if (!t){
     t = document.createElement('div');
     t.id = 'toast2';
-    t.style.cssText = 'position:fixed;left:50%;bottom:44px;transform:translateX(-50%);background:#fff;border:1px solid rgba(37,99,235,.5);color:#1d4ed8;padding:11px 24px;border-radius:999px;font-size:14px;z-index:300;box-shadow:0 12px 36px rgba(15,23,42,.18)';
+    t.style.cssText = 'position:fixed;left:50%;bottom:44px;transform:translateX(-50%);background:#fff;border:1px solid rgba(37,99,235,.5);color:#1d4ed8;padding:11px 24px;border-radius:999px;font-size:14px;z-index:300;box-shadow:0 12px 36px rgba(15,23,42,.18);pointer-events:none;transition:opacity .3s';
     document.body.appendChild(t);
   }
   t.textContent = msg;
