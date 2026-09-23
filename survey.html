@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>学省 CampusPrice · 用户体验问卷（约2分钟）</title>
 <meta name="description" content="大学生购物比价网站「学省 CampusPrice」用户调研,12题约2分钟,匿名填写,帮我们把网站做得更好用。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
@@ -28,6 +28,8 @@ header p{font-size:13px;opacity:.92;margin-top:8px}
 .opts{display:grid;gap:9px}
 .opt{display:flex;align-items:flex-start;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:14.5px;cursor:pointer;transition:.15s;background:#fbfcfe}
 .opt:active{transform:scale(.985)}
+/* 选项现在可 Tab 到达,必须给出可见焦点,否则键盘用户不知道自己在哪一项上 */
+.opt:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .opt .mark{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:2px solid #b6c2d4;margin-top:2px;position:relative;background:#fff}
 .opt.multi .mark{border-radius:6px}
 .opt .txt{line-height:1.55}
@@ -53,6 +55,9 @@ button.submit:active{transform:scale(.97)}
 .btn-back{display:inline-block;font-size:13px;color:var(--muted);text-decoration:underline}
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#17233a;color:#fff;font-size:13.5px;padding:9px 22px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:86vw;text-align:center}
 .toast.show{opacity:.96}
+/* iOS Safari 在聚焦字号 <16px 的输入框时会自动放大整页:原来靠 viewport 的
+   user-scalable=no 堵住(代价是用户无法双指缩放),这里改用与主站一致的 16px 方案 */
+@media (hover:none) and (pointer:coarse){textarea{font-size:16px}}
 </style>
 </head>
 <body>
@@ -67,6 +72,7 @@ button.submit:active{transform:scale(.97)}
   <div class="intro">
     亲爱的同学:感谢抽空参与调研!<b>「学省 CampusPrice」</b>是一个面向大学生的购物比价网站(同款商品京东/淘宝/拼多多/唯品会/得物/闲鱼六平台比价、价格波动、优惠日历、学生认证优惠汇总)。你的反馈将直接决定我们接下来做什么。建议先打开<a href="https://ppgod886.github.io/campusprice/" style="color:#1d4ed8">网站体验 1 分钟</a>,再回来答题,感受更准确~
   </div>
+  <noscript><div class="intro">本问卷的题目与提交逻辑由 JavaScript 生成,请开启 JavaScript 后刷新页面再填写。</div></noscript>
   <div id="form"></div>
   <div class="done" id="done">
     <div class="ok">✓</div>
@@ -82,7 +88,7 @@ button.submit:active{transform:scale(.97)}
   <div class="prog"><div class="txt" id="progTxt">已答 0 / 11</div><div class="track"><div class="fill" id="progFill"></div></div></div>
   <button class="submit" id="submitBtn">提交</button>
 </div></div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 const QS = [
@@ -101,6 +107,9 @@ const QS = [
 ];
 const ans = {};   // {qid: [选中文本]} 或 {12: '文字'}
 const form = document.getElementById('form');
+/* 提交成功后面板的根节点:原代码在第 206 行直接用了这个从未声明的名字,
+   点击「提交」必抛 ReferenceError -> 成功面板/复制按钮/返回首页永远出不来 */
+const doneEl = document.getElementById('done');
 
 QS.forEach(q=>{
   const card = document.createElement('div');
@@ -110,33 +119,46 @@ QS.forEach(q=>{
                  : '<span class="q-type open">选填</span>';
   let inner = `<div class="q-idx">Q${q.id}</div>${typeHtml}<div class="q-title">${q.t}</div>`;
   if (q.type === 'open'){
-    inner += `<textarea id="ta${q.id}" placeholder="畅所欲言,吐槽也欢迎~(选填)"></textarea>`;
+    inner += `<textarea id="ta${q.id}" aria-label="第 ${q.id} 题:${q.t}" placeholder="畅所欲言,吐槽也欢迎~(选填)"></textarea>`;
     card.innerHTML = inner;
     form.appendChild(card);
     setTimeout(()=>{ document.getElementById('ta'+q.id).addEventListener('input', e=>{ ans[q.id]=e.target.value; updateProg(); }); },0);
   } else {
-    inner += `<div class="opts">` + q.opts.map((o,i)=>
-      `<div class="opt ${q.type}" data-i="${i}"><span class="mark"></span><span class="txt">${o}</span></div>`).join('') + `</div>`;
+    /* 选项原本是只能点击的 <div>:键盘 / 读屏用户完全无法作答(WCAG 2.1.1)。
+       补 role + tabindex + aria-checked,让 Tab / Enter / 空格也能选 */
+    const role = q.type === 'single' ? 'radio' : 'checkbox';
+    inner += `<div class="opts" role="${q.type === 'single' ? 'radiogroup' : 'group'}">` + q.opts.map((o,i)=>
+      `<div class="opt ${q.type}" role="${role}" tabindex="0" aria-checked="false" data-i="${i}"><span class="mark"></span><span class="txt">${o}</span></div>`).join('') + `</div>`;
     card.innerHTML = inner;
     form.appendChild(card);
-    card.addEventListener('click', e=>{
-      const opt = e.target.closest('.opt'); if(!opt) return;
+    /* 选中逻辑收口到 pick():鼠标点击与键盘 Enter/空格共用同一条路径,
+       避免「视觉选中态」与「aria-checked」将来走岔 */
+    function pick(opt){
       const i = +opt.dataset.i;
       if (q.type === 'single'){
-        card.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
-        opt.classList.add('sel');
+        card.querySelectorAll('.opt').forEach(o=>{ o.classList.remove('sel'); o.setAttribute('aria-checked','false'); });
+        opt.classList.add('sel'); opt.setAttribute('aria-checked','true');
         ans[q.id] = [q.opts[i]];
       } else {
         const cur = ans[q.id] || [];
         const pos = cur.indexOf(q.opts[i]);
-        if (pos >= 0){ cur.splice(pos,1); opt.classList.remove('sel'); }
+        if (pos >= 0){ cur.splice(pos,1); opt.classList.remove('sel'); opt.setAttribute('aria-checked','false'); }
         else {
           if (q.max && cur.length >= q.max){ toast(`最多选 ${q.max} 项哦`); return; }
-          cur.push(q.opts[i]); opt.classList.add('sel');
+          cur.push(q.opts[i]); opt.classList.add('sel'); opt.setAttribute('aria-checked','true');
         }
         ans[q.id] = cur;
       }
       updateProg();
+    }
+    card.addEventListener('click', e=>{
+      const opt = e.target.closest('.opt'); if(opt) pick(opt);
+    });
+    card.addEventListener('keydown', e=>{
+      if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+      const opt = e.target.closest('.opt'); if(!opt) return;
+      e.preventDefault(); /* 空格默认会滚动页面 */
+      pick(opt);
     });
   }
 });
@@ -219,7 +241,10 @@ document.getElementById('submitBtn').addEventListener('click', async (e)=>{
       const ta = document.createElement('textarea');
       ta.value = s; ta.style.cssText='position:fixed;opacity:0';
       document.body.appendChild(ta); ta.select();
-      try{ document.execCommand('copy'); done(); }catch(e){ toast('请长按下方文字手动复制'); }
+      /* execCommand 返回 false 表示复制失败,此时不能报「已复制」
+         (仅在明确返回 false 时改口,undefined 等实现差异仍按成功处理) */
+      try{ if (document.execCommand('copy') === false) toast('请长按下方文字手动复制'); else done(); }
+      catch(e){ toast('请长按下方文字手动复制'); }
       ta.remove();
     }
   });
