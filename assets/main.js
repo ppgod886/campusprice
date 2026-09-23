@@ -376,31 +376,55 @@ function cardPrices(p){
 }
 function renderGrid(){
   const list = filtered();
-  grid.innerHTML = list.map(p=>{
-    const ps = cardPrices(p);
-    const newPs = ps.filter(x=>!x.used);
-    const min = Math.min(...newPs.map(x=>x.price));
-    const used = ps.find(x=>x.used);
-    const savePct = pct(p.base - min, p.base);
-    return `
-    <article class="card" data-id="${p.id}">
-      <div class="card-photo${p.img ? '' : ' noimg'}" data-emoji="${p.emoji}">
-        ${p.img ? `<img src="${imgUrl(p.img, 420)}" alt="${p.name}" loading="lazy" onerror="window.imgErr&&window.imgErr(this)">` : ''}
-        <span class="save-badge">到手约省 ${savePct === null ? '—' : savePct + '%'}</span>
-      </div>
-      <h3 class="card-name">${p.brand ? p.brand + ' · ' : ''}${p.name}</h3>
-      <p class="card-sell">${p.sell}</p>
-      <div class="card-p4">
-        ${ps.map(x=>`<div class="p4 ${!x.used && x.price===min ? 'best':''}"><div class="pn">${x.name}</div><div class="pv">${fmt(x.price)}</div></div>`).join('')}
-      </div>
-      <button class="card-btn">查看完整比价与波动 →</button>
-    </article>`;
-  }).join('');
+  if (!list.length){
+    /* 空结果(搜索词无匹配,或品类+品牌组合为空)在手机上就是一片空白,
+       这里给出「当前筛选」与一条一键复原的出路,避免用户以为页面坏了 */
+    const cond = [esc(curCat)]
+      .concat(curBrand !== '全部品牌' ? [esc(curBrand)] : [])
+      .concat(curTerm ? ['关键词「' + esc(curTerm) + '」'] : []).join(' · ');
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <b>没有符合条件的好物</b>
+        <p>当前筛选:${cond}。换个关键词,或清空筛选看看全部好物。</p>
+        <button class="empty-reset" type="button">清空筛选,看全部好物</button>
+      </div>`;
+  } else {
+    grid.innerHTML = list.map(p=>{
+      const ps = cardPrices(p);
+      const newPs = ps.filter(x=>!x.used);
+      const min = Math.min(...newPs.map(x=>x.price));
+      const used = ps.find(x=>x.used);
+      const savePct = pct(p.base - min, p.base);
+      return `
+      <article class="card" data-id="${p.id}">
+        <div class="card-photo${p.img ? '' : ' noimg'}" data-emoji="${p.emoji}">
+          ${p.img ? `<img src="${imgUrl(p.img, 420)}" alt="${p.name}" loading="lazy" decoding="async" onerror="window.imgErr&&window.imgErr(this)">` : ''}
+          <span class="save-badge">到手约省 ${savePct === null ? '—' : savePct + '%'}</span>
+        </div>
+        <h3 class="card-name">${p.brand ? p.brand + ' · ' : ''}${p.name}</h3>
+        <p class="card-sell">${p.sell}</p>
+        <div class="card-p4">
+          ${ps.map(x=>`<div class="p4 ${!x.used && x.price===min ? 'best':''}"><div class="pn">${x.name}</div><div class="pv">${fmt(x.price)}</div></div>`).join('')}
+        </div>
+        <button class="card-btn">查看完整比价与波动 →</button>
+      </article>`;
+    }).join('');
+  }
   resultNote.textContent = curTerm
     ? `🔍 搜索“${curTerm}”找到 ${list.length} 件好物 · 价格为演示样例`
     : `📌 ${curCat}${curBrand!=='全部品牌' ? ' · ' + curBrand : ''}共 ${list.length} 件好物 · 绿色为四平台最低到手价`;
 }
+/* 空状态复位:品类 / 品牌 / 关键词三处筛选一起清空,与点「全部」tab 的行为保持一致 */
+function resetFilters(){
+  curCat = '全部'; curTerm = ''; curBrand = '全部品牌';
+  brandSel.value = '全部品牌';
+  $('#searchInput').value = '';
+  document.querySelectorAll('#tabs .tab').forEach(t=>t.classList.toggle('active', t.dataset.cat === '全部'));
+  renderGrid();
+}
 grid.addEventListener('click', e=>{
+  if (e.target.closest('.empty-reset')){ resetFilters(); return; }
   const card = e.target.closest('.card'); if(!card) return;
   loadCompare(+card.dataset.id);
   document.getElementById('compare').scrollIntoView({behavior:'smooth'});
@@ -532,6 +556,9 @@ function renderTrend(p){
       }]},
       options:{
         responsive:true, maintainAspectRatio:false,
+        /* 触屏:手指无法像鼠标那样精确悬停到 3px 的圆点上,
+           改成「任意位置都命中最近的月份」,点一下就能看到该月价格 */
+        interaction:{mode:'index',intersect:false},
         plugins:{
           legend:{display:false},
           tooltip:{callbacks:{label:c=>` ${MONTHS[c.dataIndex]}:${fmt(c.parsed.y)}${c.dataIndex===minIdx?' (全年最低)':''}`}}
@@ -634,7 +661,9 @@ function showToast2(msg){
   if (!t){
     t = document.createElement('div');
     t.id = 'toast2';
-    t.style.cssText = 'position:fixed;left:50%;bottom:44px;transform:translateX(-50%);background:#fff;border:1px solid rgba(37,99,235,.5);color:#1d4ed8;padding:11px 24px;border-radius:999px;font-size:14px;z-index:300;box-shadow:0 12px 36px rgba(15,23,42,.18);pointer-events:none;transition:opacity .3s';
+    /* width:max-content + max-width:否则 position:fixed 元素按 left:50% 之外的剩余空间收缩,
+       长文案(如「已生成「…」的估算比价」)在手机上会被压成半屏宽的细长条 */
+    t.style.cssText = 'position:fixed;left:50%;bottom:calc(44px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);text-align:center;line-height:1.5;background:#fff;border:1px solid rgba(37,99,235,.5);color:#1d4ed8;padding:11px 24px;border-radius:22px;font-size:14px;z-index:300;box-shadow:0 12px 36px rgba(15,23,42,.18);pointer-events:none;transition:opacity .3s';
     document.body.appendChild(t);
   }
   t.textContent = msg;
@@ -680,8 +709,25 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
 const nav = $('#nav');
 addEventListener('scroll', ()=> nav.classList.toggle('scrolled', scrollY>30), {passive:true});
-$('#burger').addEventListener('click', ()=> $('#navMenu').classList.toggle('open'));
-document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click', ()=> $('#navMenu').classList.remove('open')));
+
+/* 移动端菜单:同步 aria-expanded,展开时锁定背景滚动(关闭时必须解锁,否则页面会永久不能滚动) */
+const navMenu = $('#navMenu'), burger = $('#burger');
+function setMenu(open){
+  navMenu.classList.toggle('open', open);
+  document.body.classList.toggle('menu-open', open);
+  burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+burger.addEventListener('click', ()=> setMenu(!navMenu.classList.contains('open')));
+document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click', ()=> setMenu(false)));
+/* 点菜单外的空白处 / 按 Esc 也要能关掉,而不是只能靠再点一次汉堡 */
+document.addEventListener('click', e=>{
+  if (!navMenu.classList.contains('open')) return;
+  if (e.target.closest('#navMenu') || e.target.closest('#burger')) return;
+  setMenu(false);
+});
+addEventListener('keydown', e=>{ if (e.key === 'Escape') setMenu(false); });
+/* 旋屏或拉宽窗口回到桌面断点后菜单已不可见,此处兜底解锁,避免滚动锁定残留 */
+addEventListener('resize', ()=>{ if (innerWidth > 960) setMenu(false); }, {passive:true});
 
 /* ---------- 图表默认 & 初始化 ---------- */
 if (window.Chart && Chart.defaults && Chart.defaults.font){
