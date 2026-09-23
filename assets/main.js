@@ -323,7 +323,8 @@ window.imgErr = function(img){
     img.dataset.retry = String(n + 1);
     setTimeout(()=>{ img.src = img.src + (img.src.indexOf('?')>-1?'&':'?') + 'r=' + n; }, 600 + n * 900);
   } else {
-    img.parentElement.classList.add('noimg');
+    /* 卡片可能已被重新渲染(图片已脱离文档),此时 parentElement 为 null */
+    if (img.parentElement) img.parentElement.classList.add('noimg');
   }
 };
 const fmt = n => '¥' + (n >= 100 ? Math.round(n) : Math.round(n*10)/10);
@@ -417,7 +418,8 @@ function loadCompare(idOrProduct){
   /* 六平台行 */
   const rows = PLATS.map((plat,idx)=>{
     const listPrice = priceFor(p, plat, 0, false);
-    const stuOn = !!plat.student;
+    /* 与 priceFor 的判定保持一致(平台学生权益 或 商品教育优惠),闲鱼二手不叠加 */
+    const stuOn = !!plat.student || (!!p.stu && !plat.used);
     const finalPrice = stuOn ? priceFor(p, plat, 0, true) : priceFor(p, plat, 0, false);
     return {plat, idx, listPrice, stuOn, finalPrice};
   });
@@ -459,8 +461,8 @@ function loadCompare(idOrProduct){
 
   renderTrend(p);
 
-  /* 学生认证提示 */
-  const stuRows = news.filter(r=>r.stuOn);
+  /* 学生认证提示(只推荐真正有学生认证权益的平台,避免引导到无学生价的平台) */
+  const stuRows = news.filter(r=>r.plat.student);
   if (stuRows.length) {
     const cheapestStu = stuRows.reduce((a,b)=>a.finalPrice<b.finalPrice?a:b);
     $('#cmpCur').innerHTML += ` · <span style="color:#1d4ed8">🎓 完成学生认证,${cheapestStu.plat.name}到手再省 ${fmt(cheapestStu.listPrice-cheapestStu.finalPrice)}</span>`;
@@ -468,7 +470,7 @@ function loadCompare(idOrProduct){
 }
 
 function renderTrend(p){
-  const {vals, current} = trendSeries(p);
+  const {vals, current, curIdx} = trendSeries(p);
   const min = Math.min(...vals), max = Math.max(...vals);
   const minIdx = vals.indexOf(min);
   const gapPct = Math.round((current-min)/min*100);
@@ -491,8 +493,8 @@ function renderTrend(p){
   const grad = ctx.getContext('2d').createLinearGradient(0,0,0,260);
   grad.addColorStop(0,'rgba(37,99,235,.22)');
   grad.addColorStop(1,'rgba(37,99,235,0)');
-  const radii = vals.map((v,i)=> i===minIdx ? 6 : (i===11 ? 6 : 3));
-  const colors = vals.map((v,i)=> i===minIdx ? '#059669' : (i===11 ? '#2563eb' : '#2563eb'));
+  const radii = vals.map((v,i)=> i===minIdx ? 6 : (i===curIdx ? 6 : 3));
+  const colors = vals.map((v,i)=> i===minIdx ? '#059669' : '#2563eb');
   trendChart = new Chart(ctx, {
     type:'line',
     data:{ labels:MONTHS, datasets:[{
