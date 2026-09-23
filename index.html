@@ -5,13 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>学省 CampusPrice · 大学生购物比价与优惠助手</title>
 <meta name="description" content="给大学生的跨平台购物比价工具:京东/淘宝/拼多多/闲鱼/得物同款比价,学生认证优惠汇总,历史价格波动与促销日历,让每一分生活费都花在刀刃上。">
+<link rel="canonical" href="https://ppgod886.github.io/campusprice/">
+<meta name="theme-color" content="#2563eb">
+<!-- 社交分享卡片(Open Graph / Twitter):站内原先缺失,分享到微信/QQ/微博/推特时无标题、无摘要、无配图 -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="学省 CampusPrice">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:title" content="学省 CampusPrice · 大学生购物比价与优惠助手">
+<meta property="og:description" content="给大学生的跨平台购物比价工具:京东/淘宝/拼多多/闲鱼/得物同款比价,学生认证优惠汇总,历史价格波动与促销日历。">
+<meta property="og:url" content="https://ppgod886.github.io/campusprice/">
+<meta property="og:image" content="https://ppgod886.github.io/campusprice/assets/img/1606220945770-b5b6c2c55bf1.jpg">
+<meta property="og:image:width" content="420">
+<meta property="og:image:height" content="280">
+<meta property="og:image:alt" content="学省 CampusPrice 收录的数码好物示例图">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="学省 CampusPrice · 大学生购物比价与优惠助手">
+<meta name="twitter:description" content="六平台同款比价 + 学生认证优惠 + 历史价格波动与促销日历,让每一分生活费都花在刀刃上。">
+<meta name="twitter:image" content="https://ppgod886.github.io/campusprice/assets/img/1606220945770-b5b6c2c55bf1.jpg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
-<link rel="stylesheet" href="assets/style.css?v=1790188483">
+<link rel="stylesheet" href="assets/style.css?v=1790189228">
 </head>
 <body>
 
+<!-- 键盘用户跳过固定导航条直达主体内容(仅获得焦点时可见) -->
+<a class="skip-link" href="#main">跳到主要内容</a>
+
 <!-- ============ 导航 ============ -->
-<nav class="nav" id="nav">
+<nav class="nav" id="nav" aria-label="主导航">
   <div class="nav-inner container">
     <a class="logo" href="#home">🎓 学省 <span>CampusPrice</span></a>
     <div class="nav-links" id="navMenu">
@@ -32,8 +52,8 @@
     <div class="badge reveal">🎒 大学生专属 · 跨平台比价 + 优惠提醒</div>
     <h1 class="reveal">同款商品,一图看清<span class="grad">全网底价</span></h1>
     <p class="hero-sub reveal">京东、淘宝、拼多多、闲鱼、得物、唯品会六平台同款比价,叠加学生认证优惠与历史价格波动,让每一分生活费都花在刀刃上。</p>
-    <form class="search reveal" id="searchForm">
-      <input id="searchInput" type="text" placeholder="搜索想买的商品…" autocomplete="off" enterkeyhint="search" spellcheck="false">
+    <form class="search reveal" id="searchForm" role="search" aria-label="商品搜索">
+      <input id="searchInput" type="text" placeholder="搜索想买的商品…" aria-label="搜索想买的商品" autocomplete="off" enterkeyhint="search" spellcheck="false">
       <button type="submit">🔍 一键比价</button>
     </form>
     <div class="hero-note reveal">覆盖 6 大平台 · 含学生认证优惠 · 每月促销节点提醒</div>
@@ -46,7 +66,7 @@
   </div>
 </header>
 
-<main>
+<main id="main" tabindex="-1">
 <!-- JS 被禁用时的兜底说明:榜单/比价/日历均由 assets/main.js 动态生成 -->
 <noscript>
   <div class="container" style="padding-top:24px">
@@ -61,17 +81,18 @@
       <h2>大学生高频好物 <span class="accent">四平台价格一览</span></h2>
       <p class="sec-sub">按大学生购买频率精选的品类,卡片直接展示京东 / 淘宝 / 拼多多 / 闲鱼的到手价,绿色为最低价。点击卡片查看完整比价与价格波动。</p>
     </div>
-    <div class="tabs reveal" id="tabs">
-      <button class="tab active" data-cat="全部">全部</button>
-      <button class="tab" data-cat="数码3C">数码3C</button>
-      <button class="tab" data-cat="宿舍生活">宿舍生活</button>
-      <button class="tab" data-cat="洗护美妆">洗护美妆</button>
-      <button class="tab" data-cat="文具书籍">文具书籍</button>
-      <button class="tab" data-cat="运动出行">运动出行</button>
-      <button class="tab" data-cat="服饰穿搭">服饰穿搭</button>
-      <button class="tab" data-cat="鞋靴">鞋靴</button>
-      <button class="tab" data-cat="生活日用">生活日用</button>
-      <button class="tab" data-cat="食品饮料">食品饮料</button>
+    <!-- 品类筛选:10 个按钮是多选一的筛选器,用 aria-pressed 让读屏能听出当前生效项(展开态由 JS 同步) -->
+    <div class="tabs reveal" id="tabs" role="group" aria-label="商品品类筛选">
+      <button class="tab active" data-cat="全部" aria-pressed="true">全部</button>
+      <button class="tab" data-cat="数码3C" aria-pressed="false">数码3C</button>
+      <button class="tab" data-cat="宿舍生活" aria-pressed="false">宿舍生活</button>
+      <button class="tab" data-cat="洗护美妆" aria-pressed="false">洗护美妆</button>
+      <button class="tab" data-cat="文具书籍" aria-pressed="false">文具书籍</button>
+      <button class="tab" data-cat="运动出行" aria-pressed="false">运动出行</button>
+      <button class="tab" data-cat="服饰穿搭" aria-pressed="false">服饰穿搭</button>
+      <button class="tab" data-cat="鞋靴" aria-pressed="false">鞋靴</button>
+      <button class="tab" data-cat="生活日用" aria-pressed="false">生活日用</button>
+      <button class="tab" data-cat="食品饮料" aria-pressed="false">食品饮料</button>
     </div>
     <div class="brand-bar reveal">
       <label for="brandSel">品牌:</label>
@@ -92,22 +113,23 @@
       <p class="sec-sub">选择商品后自动对比六平台到手价:含大促活动、学生认证折扣与发货时效;右侧为近一年价格波动与入手建议。</p>
     </div>
     <div class="cmp-bar reveal">
-      <form class="src-search" id="cmpSearchForm" autocomplete="off">
-        <input id="cmpSearch" type="text" placeholder="🔍 搜索商品加入比价…" enterkeyhint="search" spellcheck="false">
+      <form class="src-search" id="cmpSearchForm" autocomplete="off" role="search" aria-label="比价商品搜索">
+        <input id="cmpSearch" type="text" placeholder="🔍 搜索商品加入比价…" aria-label="搜索商品加入比价" enterkeyhint="search" spellcheck="false">
         <button type="submit" class="src-go">比价</button>
         <div class="src-suggest" id="cmpSuggest"></div>
       </form>
       <label for="cmpSelect">或选择商品:</label>
       <select id="cmpSelect"></select>
     </div>
-    <div class="cmp-cur reveal" id="cmpCur"></div>
+    <div class="cmp-cur reveal" id="cmpCur" aria-live="polite"></div>
     <div class="agg-bar reveal" id="aggBar"></div>
     <div class="cmp-wrap reveal">
       <div class="panel cmp-table-panel">
         <div class="cmp-summary" id="cmpSummary"></div>
         <div class="ptable-wrap">
           <table class="src-table">
-            <thead><tr><th>平台</th><th>标价</th><th>优惠活动</th><th>学生优惠</th><th>到手价</th><th>发货时效</th><th>购买</th></tr></thead>
+            <caption class="sr-only">六平台同款商品到手价对比表,含标价、优惠活动、学生优惠、到手价、发货时效与购买入口</caption>
+            <thead><tr><th scope="col">平台</th><th scope="col">标价</th><th scope="col">优惠活动</th><th scope="col">学生优惠</th><th scope="col">到手价</th><th scope="col">发货时效</th><th scope="col">购买</th></tr></thead>
             <tbody id="cmpBody"></tbody>
           </table>
         </div>
@@ -116,7 +138,8 @@
       </div>
       <aside class="panel cmp-chart-panel">
         <h3>📉 近一年价格波动</h3>
-        <div class="chart-box"><canvas id="trendChart"></canvas></div>
+        <!-- canvas 本身没有可访问名称;趋势数值同时以文字列在下方 #piBox 中,这里只补一个图片名 -->
+        <div class="chart-box"><canvas id="trendChart" role="img" aria-label="近一年价格走势折线图,各月具体价格见下方文字列表"></canvas></div>
         <div class="pi-box" id="piBox"></div>
       </aside>
     </div>
@@ -166,7 +189,7 @@
 </footer>
 
 <script src="assets/chart.umd.min.js?v=1"></script>
-<script src="assets/main.js?v=1790188483"></script>
+<script src="assets/main.js?v=1790189228"></script>
 <script>
 /* 兜底:若 assets/main.js 网络加载或执行失败,首屏动态区域会保持为空,这里补一条可读提示 */
 window.addEventListener('load', function () {
