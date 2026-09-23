@@ -147,6 +147,12 @@ section{scroll-margin-top:84px}
 .buy-link:hover{background:rgba(37,99,235,.16)}
 .ptable-wrap{overflow-x:auto}
 .chart-box{height:260px;margin-bottom:14px}
+/* Chart.js 加载失败时的降级:隐藏空白 canvas,居中显示文字说明 */
+.chart-box.nochart{display:grid;place-items:center;background:#f6f8fb;border:1px dashed var(--line);border-radius:12px}
+.chart-box.nochart canvas{display:none}
+.chart-fallback{color:var(--muted);font-size:13px;line-height:1.7;text-align:center;padding:0 18px}
+/* JS 被禁用 / main.js 加载失败时的兜底提示 */
+.load-fallback{color:var(--muted);font-size:14px;line-height:1.7;text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);padding:26px}
 .cmp-chart-panel h3{font-size:16px;margin-bottom:12px}
 .pi-box{background:#f6f8fb;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.8}
 .pi-box .pi-line{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:3px 0}
