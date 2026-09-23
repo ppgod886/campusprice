@@ -24,6 +24,10 @@ body{
 ::selection{background:rgba(37,99,235,.2)}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer}
+/* 触屏:去掉点击时的灰色高亮块,并去掉 300ms 点击延迟 */
+a,button,select,input,label{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+/* 移动端菜单展开时锁定背景滚动(避免在浮层下方误滚页面) */
+body.menu-open{overflow:hidden}
 section{scroll-margin-top:84px}
 .container{width:min(1180px,92%);margin:0 auto}
 
@@ -37,7 +41,8 @@ section{scroll-margin-top:84px}
 .nav-links a{color:var(--muted);transition:.2s}
 .nav-links a:hover{color:var(--text)}
 .nav-cta{padding:8px 18px;border-radius:999px;background:linear-gradient(90deg,#2563eb,#0ea5e9);color:#fff!important;font-weight:700;box-shadow:0 4px 14px rgba(37,99,235,.3)}
-.burger{display:none;background:none;border:none;color:var(--text);font-size:22px}
+/* 汉堡按钮:44×44 的最小可点区域(图标仍为 22px,视觉不变) */
+.burger{display:none;place-items:center;width:44px;height:44px;margin-right:-10px;background:none;border:none;color:var(--text);font-size:22px;line-height:1}
 
 /* ============ Hero ============ */
 .hero{
@@ -110,7 +115,8 @@ section{scroll-margin-top:84px}
 .src-search input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.14)}
 .src-go{position:absolute;right:5px;top:50%;transform:translateY(-50%);padding:7px 18px;border-radius:8px;border:none;background:linear-gradient(90deg,#2563eb,#0ea5e9);color:#fff;font-weight:700;font-size:13px}
 .src-go:hover{filter:brightness(1.08)}
-.src-suggest{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px rgba(15,23,42,.16);z-index:60;display:none;max-height:288px;overflow-y:auto}
+/* max-height 两行:第二行按视口高度收缩(小屏尤其横屏时不至于超出屏幕) */
+.src-suggest{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px rgba(15,23,42,.16);z-index:60;display:none;max-height:288px;max-height:min(288px,45vh);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .src-suggest.show{display:block}
 .src-suggest button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:none;border:none;font-size:14px;color:var(--text);cursor:pointer;text-align:left}
 .src-suggest button:hover{background:#f1f5f9}
@@ -145,7 +151,10 @@ section{scroll-margin-top:84px}
 .strike{color:#94a3b8;text-decoration:line-through;font-weight:600;font-size:12px}
 .buy-link{padding:6px 14px;border-radius:8px;border:1px solid rgba(37,99,235,.4);background:rgba(37,99,235,.07);color:#1d4ed8;font-size:12.5px;font-weight:700;white-space:nowrap;cursor:pointer;transition:.2s;display:inline-block}
 .buy-link:hover{background:rgba(37,99,235,.16)}
-.ptable-wrap{overflow-x:auto}
+/* 7 列比价表在窄屏必然横向滚动:仅小屏提示可滑动,避免用户以为右侧几列不存在 */
+.table-hint{display:none;color:var(--muted);font-size:12.5px;text-align:center;margin:10px 0 0}
+.table-hint b{color:var(--blue)}
+.ptable-wrap{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 .chart-box{height:260px;margin-bottom:14px}
 /* Chart.js 加载失败时的降级:隐藏空白 canvas,居中显示文字说明 */
 .chart-box.nochart{display:grid;place-items:center;background:#f6f8fb;border:1px dashed var(--line);border-radius:12px}
@@ -153,6 +162,13 @@ section{scroll-margin-top:84px}
 .chart-fallback{color:var(--muted);font-size:13px;line-height:1.7;text-align:center;padding:0 18px}
 /* JS 被禁用 / main.js 加载失败时的兜底提示 */
 .load-fallback{color:var(--muted);font-size:14px;line-height:1.7;text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);padding:26px}
+/* 筛选/搜索结果为 0 时的空状态(与 .load-fallback 同一套视觉语言) */
+.empty-state{grid-column:1/-1;text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);padding:34px 20px;box-shadow:var(--shadow)}
+.empty-state .empty-icon{font-size:34px;line-height:1.2;margin-bottom:8px}
+.empty-state b{display:block;font-size:16.5px}
+.empty-state p{color:var(--muted);font-size:13.5px;margin:8px auto 0;max-width:420px;line-height:1.7}
+.empty-reset{margin-top:16px;min-height:44px;padding:10px 22px;border-radius:999px;border:1px solid rgba(37,99,235,.35);background:rgba(37,99,235,.06);color:#1d4ed8;font-size:14px;font-weight:700}
+.empty-reset:hover{background:rgba(37,99,235,.14)}
 .cmp-chart-panel h3{font-size:16px;margin-bottom:12px}
 .pi-box{background:#f6f8fb;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.8}
 .pi-box .pi-line{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:3px 0}
@@ -199,9 +215,14 @@ section{scroll-margin-top:84px}
   .cmp-wrap{grid-template-columns:1fr}
   .cal-grid{grid-template-columns:repeat(2,1fr)}
   .stu-grid{grid-template-columns:repeat(2,1fr)}
-  .burger{display:block}
-  .nav-links{position:fixed;top:64px;right:0;left:0;background:rgba(255,255,255,.98);flex-direction:column;padding:22px;gap:18px;border-bottom:1px solid var(--line);transform:translateY(-130%);transition:.3s;z-index:-1;box-shadow:0 16px 40px rgba(15,23,42,.1)}
+  .burger{display:grid}
+  /* max-height 两行:第二行按视口高度收缩,横屏/小屏不会把菜单撑出屏幕外 */
+  .nav-links{position:fixed;top:64px;right:0;left:0;background:rgba(255,255,255,.98);flex-direction:column;padding:22px;gap:18px;border-bottom:1px solid var(--line);transform:translateY(-130%);transition:.3s;z-index:-1;box-shadow:0 16px 40px rgba(15,23,42,.1);max-height:calc(100vh - 64px);max-height:calc(100dvh - 64px);overflow-y:auto;overscroll-behavior:contain}
   .nav-links.open{transform:none}
+  /* 菜单项整行可点,高度 ≥44px(原来只有文字本身可点,手指容易点空) */
+  .nav-links a{display:block;width:100%;padding:11px 12px;text-align:center}
+  .nav-links a:active{background:rgba(37,99,235,.07)}
+  .nav-links .nav-cta{padding:12px 18px}
   .hero{padding-top:120px}
 }
 @media (max-width:640px){
@@ -211,4 +232,28 @@ section{scroll-margin-top:84px}
   .search button{padding:10px 14px;font-size:13.5px}
   .stat{min-width:calc(50% - 14px);padding:16px 18px}
   .section{padding:60px 0}
+  .panel{padding:18px 14px}
+  /* 小屏(含 280~350px 折叠屏)下固定最小宽度会撑破父容器,改为占满整行 */
+  .src-search{min-width:0;max-width:none}
+  .src-select{min-width:0;max-width:none;width:100%}
+  /* 触屏可点区域:统一抬到 44px 左右 */
+  .tab{padding:10px 16px;min-height:44px}
+  .card-btn{min-height:44px;padding:12px 10px}
+  .buy-link{display:inline-flex;align-items:center;min-height:44px;padding:8px 16px}
+  .src-go{padding:9px 18px;min-height:38px}
+  .src-suggest button{min-height:44px}
+  .agg-bar a{min-height:40px;padding:8px 14px}
+  .table-hint{display:block}
+}
+/* ---------- 触屏 / 无 hover 设备 ---------- */
+/* 输入框字号 ≥16px:iOS Safari 在字号 <16px 的输入框获得焦点时会自动放大整页 */
+@media (hover:none) and (pointer:coarse){
+  .search input,.src-search input,.brand-bar select,.src-select{font-size:16px}
+}
+/* 触屏没有真正的 hover:点按后 :hover 会一直「粘住」,取消位移动效避免视觉残留 */
+@media (hover:none){
+  .card:hover{transform:none;border-color:var(--line);box-shadow:var(--shadow)}
+  .card:hover .card-photo img{transform:none}
+  .cal-card:not(.now):hover{transform:none}
+  .stu-card:hover{transform:none;border-color:var(--line)}
 }
