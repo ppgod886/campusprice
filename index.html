@@ -6,7 +6,7 @@
 <title>学省 CampusPrice · 大学生购物比价与优惠助手</title>
 <meta name="description" content="给大学生的跨平台购物比价工具:京东/淘宝/拼多多/闲鱼/得物同款比价,学生认证优惠汇总,历史价格波动与促销日历,让每一分生活费都花在刀刃上。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
-<link rel="stylesheet" href="assets/style.css?v=1790187961">
+<link rel="stylesheet" href="assets/style.css?v=1790188483">
 </head>
 <body>
 
@@ -22,7 +22,7 @@
       <a href="survey.html">📝 问卷</a>
       <a class="nav-cta" href="#grid">开始省钱</a>
     </div>
-    <button class="burger" id="burger" aria-label="菜单">☰</button>
+    <button class="burger" id="burger" aria-label="打开导航菜单" aria-controls="navMenu" aria-expanded="false">☰</button>
   </div>
 </nav>
 
@@ -33,7 +33,7 @@
     <h1 class="reveal">同款商品,一图看清<span class="grad">全网底价</span></h1>
     <p class="hero-sub reveal">京东、淘宝、拼多多、闲鱼、得物、唯品会六平台同款比价,叠加学生认证优惠与历史价格波动,让每一分生活费都花在刀刃上。</p>
     <form class="search reveal" id="searchForm">
-      <input id="searchInput" type="text" placeholder="搜索想买的商品,如「蓝牙耳机」「收纳箱」「考研资料」…" autocomplete="off">
+      <input id="searchInput" type="text" placeholder="搜索想买的商品…" autocomplete="off" enterkeyhint="search" spellcheck="false">
       <button type="submit">🔍 一键比价</button>
     </form>
     <div class="hero-note reveal">覆盖 6 大平台 · 含学生认证优惠 · 每月促销节点提醒</div>
@@ -78,7 +78,7 @@
       <select id="brandSel" class="src-select"></select>
       <span class="brand-tip">主流品牌覆盖,筛选后自动联动比价</span>
     </div>
-    <div class="result-note" id="resultNote">📌 按大学生购买热度排序 · 价格为演示样例,下单前以平台实时价为准</div>
+    <div class="result-note" id="resultNote" aria-live="polite">📌 按大学生购买热度排序 · 价格为演示样例,下单前以平台实时价为准</div>
     <div class="grid" id="productGrid"></div>
   </div>
 </section>
@@ -93,7 +93,7 @@
     </div>
     <div class="cmp-bar reveal">
       <form class="src-search" id="cmpSearchForm" autocomplete="off">
-        <input id="cmpSearch" type="text" placeholder="🔍 搜索商品加入比价,如「保温杯」「洗面奶」…">
+        <input id="cmpSearch" type="text" placeholder="🔍 搜索商品加入比价…" enterkeyhint="search" spellcheck="false">
         <button type="submit" class="src-go">比价</button>
         <div class="src-suggest" id="cmpSuggest"></div>
       </form>
@@ -111,6 +111,7 @@
             <tbody id="cmpBody"></tbody>
           </table>
         </div>
+        <p class="table-hint">👈 手机上表格可<b>左右滑动</b>,查看「学生优惠 / 到手价 / 发货时效 / 购买」👉</p>
         <p class="form-tip" style="margin-top:12px">💡 到手价 = 标价叠加平台活动与学生认证折扣后的估算值(演示数据);绿色行是当前新货最低价,闲鱼仅作二手参考不计入最低价。</p>
       </div>
       <aside class="panel cmp-chart-panel">
@@ -165,7 +166,7 @@
 </footer>
 
 <script src="assets/chart.umd.min.js?v=1"></script>
-<script src="assets/main.js?v=1790187961"></script>
+<script src="assets/main.js?v=1790188483"></script>
 <script>
 /* 兜底:若 assets/main.js 网络加载或执行失败,首屏动态区域会保持为空,这里补一条可读提示 */
 window.addEventListener('load', function () {
