@@ -245,6 +245,7 @@ section{scroll-margin-top:84px}
   .nav-links a:active{background:rgba(37,99,235,.07)}
   .nav-links .nav-cta{padding:12px 18px}
   .hero{padding-top:120px}
+  .table-hint{display:block}
 }
 @media (max-width:640px){
   .cal-grid{grid-template-columns:1fr}
