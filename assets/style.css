@@ -165,6 +165,12 @@ section{scroll-margin-top:84px}
 .buy-link:hover{background:rgba(37,99,235,.16)}
 /* 7 列比价表在窄屏必然横向滚动:仅小屏提示可滑动,避免用户以为右侧几列不存在 */
 .table-hint{display:none;color:var(--muted);font-size:12.5px;text-align:center;margin:10px 0 0}
+.form-tip{color:var(--muted);font-size:13.5px;line-height:1.7}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none;transition:none}
+  .card:hover,.cal-card:hover,.stu-card:hover{transform:none}
+}
 .table-hint b{color:var(--blue)}
 .ptable-wrap{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 .chart-box{height:260px;margin-bottom:14px}
