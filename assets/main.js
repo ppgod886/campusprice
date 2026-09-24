@@ -226,7 +226,11 @@ const IMG3 = {
   watch:'1546868871-7041f2a55e12', canvas:'1525966222134-fcfa99b8ae77',
   tee3:'1576566588028-4147f3842f27',
   jeans:'1542272604-787c3835535d', bread:'1549931319-a545dcf3bc73',
-  noodles:'1612929633738-8fe44f7ec841'
+  noodles:'1612929633738-8fe44f7ec841',
+  bottle:'1602143407151-7111542de6e8', cleanser:'1620916566398-39f1143ab7be',
+  sneaker:'1600185365483-26d7a4cc7519', backpack:'1622560480605-d83c853bc5c3',
+  keyboard:'1587829741301-dc798b83add3', notebook:'1517842645767-c639042777db',
+  mouse2:'1615663245857-ac93bb7c39e7'
 };
 const ALLIMG = Object.assign({}, IMG, IMG2, IMG3);
 const PER_PRODUCT = {
@@ -278,7 +282,7 @@ const PER_PRODUCT = {
   '动力巢跑步鞋':'red','轻量运动鞋':'red','休闲板鞋':'white','慢跑鞋':'red',
   'Old Skool 滑板鞋':'canvas','复古板鞋':'pastel','轻量跑步鞋':'red','574 经典款':'white',
   '通勤单鞋':'loafers','商务皮鞋':'loafers','正装皮鞋':'loafers','一脚蹬懒人鞋':'white',
-  '复古马丁靴':'boots','切尔西短靴':'boots','防滑篮球鞋':'colorful','户外徒步鞋':'dark',
+  '复古马丁靴':'boots','切尔西短靴':'boots','户外徒步鞋':'dark',
   '登山越野鞋':'dark','防滑篮球':'basketball','可拆卸哑铃':'gym','瑜伽球':'yoga',
   '运动短裤':'workout','速干训练 T':'workout','运动袜 5 双':'socks','折叠晴雨伞':'umbrella',
   '速干运动毛巾':'workout'
@@ -299,8 +303,6 @@ const PLATS = [
 ];
 const PROMO_TAG_CLS = 'promo-tag';
 
-/* 学生认证优惠汇总(静态展示) */
-const stuExtra = p => p.stu || null; /* 部分大件有专属学生折扣(如笔记本教育优惠) */
 
 /* ---------- 价格波动(12个月,含大促 dips) ---------- */
 const MONTHS = ['10月','11月','12月','1月','2月','3月','4月','5月','6月','7月','8月','9月'];
@@ -344,7 +346,7 @@ const safeEnc = s => { try { return encodeURIComponent(s); } catch(e){ return en
 function seedOf(p){ return typeof p.id === 'number' ? p.id : (p.__seed || 1); }
 function priceFor(p, plat, idx, student){
   let v = p.base * plat.multi * (0.95 + prand(seedOf(p)*53 + idx*29)*0.1);
-  if (student && (plat.student || p.stu)) v *= (p.stu || plat.student);
+  if (student && plat.student) v *= (p.stu ? Math.min(plat.student, p.stu) : plat.student);
   return v >= 100 ? Math.round(v) : Math.round(v*10)/10;
 }
 
@@ -369,8 +371,8 @@ function filtered(){
 
 function cardPrices(p){
   /* 卡片上显示 京东/淘宝/拼多多/闲鱼 到手价(二手不叠加学生折扣) */
-  return PLATS.filter(x=>['jd','tb','pdd','xy'].includes(x.key)).map(plat=>{
-    const price = priceFor(p, plat, 0, !plat.used);
+  return PLATS.filter(x=>['jd','tb','pdd','xy'].includes(x.key)).map((plat, i)=>{
+    const price = priceFor(p, plat, i, !plat.used);
     return {key:plat.key, name:plat.name.split('(')[0], price, used:!!plat.used};
   });
 }
@@ -394,8 +396,7 @@ function renderGrid(){
       const ps = cardPrices(p);
       const newPs = ps.filter(x=>!x.used);
       const min = Math.min(...newPs.map(x=>x.price));
-      const used = ps.find(x=>x.used);
-      const savePct = pct(p.base - min, p.base);
+          const savePct = pct(p.base - min, p.base);
       const title = (p.brand ? p.brand + ' · ' : '') + p.name;
       return `
       <article class="card" data-id="${p.id}">
@@ -437,7 +438,7 @@ grid.addEventListener('click', e=>{
   if (e.target.closest('.empty-reset')){ resetFilters(); return; }
   const card = e.target.closest('.card'); if(!card) return;
   loadCompare(+card.dataset.id);
-  document.getElementById('compare').scrollIntoView({behavior:'smooth'});
+  document.getElementById('compare').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth'});
 });
 $('#tabs').addEventListener('click', e=>{
   const btn = e.target.closest('.tab'); if(!btn) return;
@@ -452,7 +453,14 @@ let trendChart = null;
 function loadCompare(idOrProduct){
   const p = typeof idOrProduct === 'object' ? idOrProduct : P.find(x=>x.id===idOrProduct);
   if (!p) return; /* id 找不到对应商品(如陈旧 DOM 事件)时安全退出,避免后续 p.xxx 抛错 */
-  if ([...cmpSelect.options].some(o => o.value == p.id)) cmpSelect.value = p.id;
+  if ([...cmpSelect.options].some(o => o.value == p.id)) {
+    cmpSelect.value = p.id;
+  } else {
+    let o = cmpSelect.querySelector('option[value="__custom"]');
+    if (!o){ o = new Option('', '__custom'); cmpSelect.insertBefore(o, cmpSelect.firstChild); }
+    o.textContent = p.name + '(估算)';
+    cmpSelect.value = '__custom';
+  }
   $('#cmpCur').innerHTML = `📦 当前比价:<b>${esc(p.emoji)} ${esc(p.name)}</b>(${esc(p.cat)}) · 标价参考 ${fmt(p.base)}`;
   // 免登录比价工具条(购物党/慢慢买/什么值得买)
   const pk = safeEnc(p.name);
@@ -463,10 +471,10 @@ function loadCompare(idOrProduct){
 
   /* 六平台行 */
   const rows = PLATS.map((plat,idx)=>{
-    const listPrice = priceFor(p, plat, 0, false);
+    const listPrice = priceFor(p, plat, idx, false);
     /* 与 priceFor 的判定保持一致(平台学生权益 或 商品教育优惠),闲鱼二手不叠加 */
-    const stuOn = !!plat.student || (!!p.stu && !plat.used);
-    const finalPrice = stuOn ? priceFor(p, plat, 0, true) : priceFor(p, plat, 0, false);
+    const stuOn = !!plat.student;
+    const finalPrice = stuOn ? priceFor(p, plat, idx, true) : priceFor(p, plat, idx, false);
     return {plat, idx, listPrice, stuOn, finalPrice};
   });
   const news = rows.filter(r=>!r.plat.used);
@@ -484,7 +492,7 @@ function loadCompare(idOrProduct){
     const isBest = !r.plat.used && r.finalPrice===min;
     const promos = r.plat.promos.map(t=>`<span class="${PROMO_TAG_CLS}">${t}</span>`).join('');
     const stu = r.stuOn
-      ? `<span class="stu-tag">${p.stu && !r.plat.used && p.stu<0.93 ? '教育优惠 '+(p.stu*10).toFixed(1).replace('.0','')+'折' : r.plat.stuLabel}</span>`
+      ? `<span class="stu-tag">${r.plat.stuLabel || '学生认证优惠'}</span>`
       : (r.plat.stuLabel ? `<span style="color:#64748b;font-size:12px">无</span>` : '');
     // 各平台商品搜索直达链接(带商品关键词)
     const kw = safeEnc((p.brand ? p.brand + ' ' : '') + p.name);
@@ -580,13 +588,23 @@ function renderTrend(p){
   } catch(err){
     /* 图表组件自身异常不应向外冒泡,更不能中断首屏初始化(榜单/日历) */
     trendChart = null;
+    const box = document.querySelector('.chart-box');
+    if (box){
+      box.classList.add('nochart');
+      if (!box.querySelector('.chart-fallback')){
+        const tip = document.createElement('p');
+        tip.className = 'chart-fallback';
+        tip.textContent = '图表组件暂不可用,价格区间已在上方文字中列出';
+        box.appendChild(tip);
+      }
+    }
     if (window.console && console.warn) console.warn('[CampusPrice] 价格趋势图渲染失败:', err);
   }
 }
 
 const cmpSelect = $('#cmpSelect');
 cmpSelect.innerHTML = P.map(p=>`<option value="${p.id}">${p.brand ? p.brand + ' ' : ''}${p.name}(${fmt(p.base)})</option>`).join('');
-cmpSelect.addEventListener('change', ()=> loadCompare(+cmpSelect.value));
+cmpSelect.addEventListener('change', ()=>{ if (cmpSelect.value === '__custom') return; loadCompare(+cmpSelect.value); });
 
 /* ---------- 比价搜索(联想+自定义) ---------- */
 const cmpSearchForm = $('#cmpSearchForm'), cmpSearch = $('#cmpSearch'), cmpSuggest = $('#cmpSuggest');
@@ -708,8 +726,10 @@ $('#searchForm').addEventListener('submit', e=>{
 const countObs = new IntersectionObserver((es,obs)=>{
   es.forEach(e=>{ if(e.isIntersecting){ countUp(e.target); obs.unobserve(e.target); } });
 },{threshold:.4});
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function countUp(el){
   const target = +el.dataset.count, suffix = el.dataset.suffix || '';
+  if (reduceMotion){ el.textContent = target + suffix; return; }
   const t0 = performance.now(), dur = 1200;
   (function tick(t){
     const p = Math.min(1,(t-t0)/dur), ease = 1-Math.pow(1-p,3);
